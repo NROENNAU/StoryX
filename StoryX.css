@@ -1,0 +1,273 @@
+/* Allgemeine Seiteneinstellungen */
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #2f2f2f;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hidden {
+    display: none;
+}
+/* Header and footer styles remain the same */
+
+/* Full-height content container (excluding header and footer) */
+.fullscreen-content-container {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+  flex-grow: 1; /* Fills available space between header and footer */
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Hauptcontainer und Box-Stile */
+.story-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+  text-align: center;
+}
+
+.story-text {
+  font-size: 200%;
+  margin-bottom: 10px;
+}
+
+/* Button-Styles */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 20px 0;
+}
+
+.button {
+  font-size: 20px;
+  padding: 15px 25px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  color: black;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Kopf- und Fußleiste */
+.header, .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.app-name, .group-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.group-title {
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+/* Dropdown-Menü */
+.group-dropdown {
+  position: absolute;
+  top: 8%; /* Start directly below the header */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  display: none;
+  margin-top: 5px;
+  width: 220px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.group-dropdown button {
+  padding: 12px;
+  width: 100%;
+  background-color: white;
+  color: black;
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-dropdown button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Benutzername und versteckte Elemente */
+.username {
+  font-weight: bold;
+  padding: 10px;
+}
+
+.hidden {
+  display: none;
+}
+/* Container for the login and registration forms */
+.login-container, .register-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner spacing */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    max-width: 400px; /* Limit width */
+    margin: 50px auto; /* Center horizontally with margin on top and bottom */
+    text-align: center; /* Center text */
+}
+
+/* Input fields styling */
+.login-container input,
+.register-container input {
+    width: 100%; /* Full width */
+    padding: 10px; /* Inner spacing */
+    margin: 10px 0; /* Spacing between inputs */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+/* Button styling */
+.login-container button,
+.register-container button {
+    width: 100%; /* Full width */
+    padding: 10px; /* Inner spacing */
+    background-color: #007BFF; /* Primary color */
+    color: white; /* Text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer on hover */
+    font-size: 16px; /* Font size */
+}
+
+.login-container button:hover,
+.register-container button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Hidden class to toggle visibility */
+.hidden {
+    display: none; /* Hides the element */
+}
+/* Overlay for login/register */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none;
+}
+
+.auth-box {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  text-align: center;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.message {
+  color: #333;
+  font-size: 14px;
+  margin-top: 10px;
+}
+/* Basic styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styling */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+}
+
+/* User Icon */
+.user-icon img {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+/* Dropdown for user actions */
+.user-dropdown {
+  display: none;
+  position: absolute;
+  right: 20px;
+  background: #fff;
+  color: #333;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Overlay for login and registration screens */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none;
+}
+
+.message {
+  color: #333;
+  font-size: 14px;
+  margin-top: 10px;
+}

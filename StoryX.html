@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryX - Hauptcontainer</title>
+  <link rel="stylesheet" href="StoryX.css">
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script src="StoryX.js" defer></script>
+</head>
+<body>
+  <div class="header">
+    <div class="app-name">StoryX</div>
+    <div class="group-title" id="groupTitle">
+      Aktuelle Gruppe: <span id="currentGroupName"></span>
+    </div>
+<div class="user-icon" onclick="toggleDropdown()">
+  <img src="user-icon.png" alt="User Icon">
+  <div id="userDropdown" class="dropdown hidden">
+    <p id="usernameDisplay"></p>
+    <button onclick="logout()">Abmelden</button>
+  </div>
+</div>
+  </div>
+
+  <div id="mainContainer">
+<!-- Login/Register Container -->
+<div id="authContainer" class="overlay hidden">
+  <div class="auth-box">
+    <h2 id="authTitle">Anmelden</h2>
+    <input type="email" id="authEmail" placeholder="E-Mail" required>
+    <input type="password" id="authPassword" placeholder="Passwort" required>
+    <button onclick="login()">Anmelden</button>
+    <p>Noch kein Konto? <span onclick="toggleAuthMode()" style="cursor:pointer; color:blue;">Registrieren</span></p>
+    <p id="loginMessage" style="color:red;"></p>
+  </div>
+</div>
+
+<div id="registerContainer" class="overlay hidden">
+  <div class="auth-box">
+    <h2 id="registerTitle">Registrieren</h2>
+    <input type="text" id="registerUsername" placeholder="Benutzername" required>
+    <input type="email" id="registerEmail" placeholder="E-Mail" required>
+    <input type="password" id="registerPassword" placeholder="Passwort" required>
+    <button onclick="register()">Registrieren</button>
+    <p>Bereits ein Konto? <span onclick="toggleAuthMode()" style="cursor:pointer; color:blue;">Anmelden</span></p>
+    <p id="registerMessage" style="color:red;"></p>
+  </div>
+</div>
+      </div>
+    </div>
+
+    <!-- Content when logged in -->
+    <div id="contentContainer">
+      <div id="storyBox" style="display: none;">
+        <p class="story-text" id="storyText">Story-Teaser</p>
+        <button class="button" id="nextStoryBtn" onclick="showNextStory()">Nächste Story</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="groupCreation" style="display: none;">
+    <h2>Gruppe erstellen</h2>
+    <input type="text" id="groupName" placeholder="Gruppenname">
+    <textarea id="groupDescription" placeholder="Beschreibung"></textarea>
+    <button onclick="createGroup()">Gruppe erstellen</button>
+    <button onclick="closeGroupCreation()">Abbrechen</button>
+  </div>
+
+  <div class="story-box" id="storyBox" style="display: none;">
+    <p class="story-text" id="storyText">Story-Teaser</p>
+    <div class="button-container">
+      <button class="button" id="nextStoryBtn" onclick="showNextStory()">Nächste Story</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="button" onclick="showAllStories()">Alle Stories</button>
+    <button class="button" onclick="goToRandomStory()">Zufällige Story</button>
+    <button class="button" onclick="goToAddStory()">Story hinzufügen</button>
+  </div>
+</body>
+</html>
