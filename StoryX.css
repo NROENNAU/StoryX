@@ -211,10 +211,10 @@ h3 {
   background-color: #ffffff; /* Weißer Hintergrund für den Container */
   border-radius: 12px; /* Abgerundete Ecken */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Intensiverer Schatten für Tiefe */
-  padding: 30px; /* Innenabstand */
-  margin: 20px; /* Außenabstand */
-  max-width: 2000px; /* Maximale Breite */
-  width: 90%; /* Responsive Breite */
+  padding: 20px; /* Innenabstand */
+  margin: 10px; /* Außenabstand */
+  max-width: 100%; /* Maximale Breite */
+  width: 100%; /* Responsive Breite */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Übergangseffekte */
 justify-content: center;
   align-items: center;
