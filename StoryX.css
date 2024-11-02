@@ -214,7 +214,7 @@ h3 {
   padding: 20px; /* Innenabstand */
   margin: 10px auto; /* Zentriert den Container horizontal */
   max-width: 100%; /* Optional: maximale Breite, um den Container einzuschränken */
-  width: 80%; /* Responsive Breite */
+  width: 95%; /* Responsive Breite */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Übergangseffekte */
   box-sizing: border-box; /* Stellt sicher, dass Padding in der Breite enthalten ist */
 }
