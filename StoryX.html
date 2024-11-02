@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryX - Hauptcontainer</title>
+  <link rel="stylesheet" href="StoryX.css">
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script src="StoryX.js" defer></script>
+</head>
+<body>
+<div class="header">
+    <div class="app-name">StoryX</div>
+    <div id="currentGroupHeader" onclick="loadUserGroups()">
+      <div class="current-group-name" id="currentGroupName">Aktuelle Gruppe: N/A</div>
+    </div>
+  <div class="user-icon" onclick="window.location.href='user.html'" style="font-size: 24px; cursor: pointer;">
+    &#128100;
+</div> 
+      <div id="userDropdown" class="dropdown hidden">
+        <p id="usernameDisplay"></p>
+        <button onclick="logout()">Abmelden</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainContainer">
+
+    
+<div id="welcomePopup" class="popup hidden">
+    <div class="popup-content">
+        <h2>Willkommen bei StoryX!</h2>
+        <p>StoryX ist eine Plattform, auf der du Geschichten erstellen und teilen kannst. Schließe dich Gruppen an und erlebe neue Abenteuer!</p>
+        <button onclick="redirectToGroupsPage()">Jetzt Gruppe erstellen oder beitreten</button>
+    </div>
+</div>
+
+<!-- Group Management Section -->
+    <div id="groupListContainer" class="hidden">
+      <h2>Meine Gruppen</h2>
+      <ul id="groupsList"></ul> <!-- Hier wird die Gruppenliste angezeigt -->
+    </div>
+
+    <div id="groupContainer" class="hidden">
+      <div id="groupOptionsContainer">
+        <button onclick="showGroupCreationForm()">Neue Gruppe erstellen</button>
+        <input type="text" id="groupIdInput" placeholder="Gruppen-ID suchen">
+        <button onclick="searchGroupById()">Gruppe beitreten</button>
+      </div>
+    </div>
+
+    <div id="groupCreationContainer" class="hidden">
+      <h2>Gruppe erstellen</h2>
+      <input type="text" id="groupName" placeholder="Gruppenname">
+      <textarea id="groupDescription" placeholder="Beschreibung"></textarea>
+      <button onclick="createGroup()">Gruppe erstellen</button>
+      <button onclick="initializeBody()">Abbrechen</button>
+    </div>
+
+    <div id="storyOverlay" class="overlay hidden">
+      <div class="story-box">
+        <div class="story-content" id="storyContent"></div>
+        <button id="closeStoryButton" class="button" onclick="closeStory()">Schließen</button>
+      </div>
+    </div>
+
+    <!-- Story-List-Container im Body -->
+    <div id="storyListContainer" class="story-list-container hidden"></div>
+
+  <div id="randomStoryContainer" class="hidden" style="text-align: center;">
+    <div class="story-box large-container">
+        <h1>Zufällige Story</h1>
+        <p class="story-text" id="storyText">Hier erscheint die zufällige Story...</p>
+        <div class="button-container">
+            <button class="button" onclick="goToRandomStory()">▶️ Nächste Story</button>
+            <button class="button" onclick="goToAddVersion()">🆕 Eigene Version anlegen</button>
+        </div>
+    </div>
+
+    <div id="versionsContainer" class="container">
+        <div id="versionsList" class="versions-list"></div>
+        <button class="button" onclick="redirectToVersionsPage()">Zu den Versionen 🎉</button>
+    </div>
+</div>
+
+            <!-- Create story im Body -->
+<div id="addStoryContainer" class="hidden">
+  <div class="story-box">
+    <h2 class="story-title">Story hinzufügen</h2>
+    <h3 class="story-subtitle">Gib einen kurzen Story-Teaser ab, der Spielraum für unterschiedliche Story-Versionen deiner Freunde zulässt</h3>
+    <textarea id="storyInput" placeholder="Gib deine Story hier ein..." maxlength="50"></textarea>
+    <div class="character-count" id="characterCount">0/50</div>
+ 
+
+  <!-- Hidden Story Checkbox -->
+  <label>
+    <input type="checkbox" id="hiddenStoryCheckbox">
+    Diese Story als verborgen markieren
+  </label> </div>
+
+  <div class="button-container">
+    <button class="button" onclick="addStory()">Speichern</button>
+    <button class="button" onclick="cancel()">Abbrechen</button>
+  </div>
+</div>
+
+    <div class="footer">
+      <button class="button" onclick="showAllStories()">Alle Stories</button>
+      <button class="button" onclick="goToRandomStory()">Zufällige Story</button>
+      <button class="button" onclick="goToAddStory()">Story hinzufügen</button>
+    </div>
+
+  </div>
+
+  

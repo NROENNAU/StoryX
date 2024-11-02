@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryX - Anmelden/Registrieren</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 400px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            color: red;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="authContainer" class="auth-container">
+        <div id="loginForm">
+            <h1>Anmelden</h1>
+            <div id="loginMessage" class="message"></div>
+            <input type="email" id="authEmail" placeholder="E-Mail" required>
+            <input type="password" id="authPassword" placeholder="Passwort" required>
+            <button onclick="login()">Anmelden</button>
+            <p>Noch keinen Account? <a href="#" onclick="toggleAuthMode()">Registrieren</a></p>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <h1>Registrieren</h1>
+            <div id="registerMessage" class="message"></div>
+            <input type="text" id="registerUsername" placeholder="Benutzername" required>
+            <input type="email" id="registerEmail" placeholder="E-Mail" required>
+            <input type="password" id="registerPassword" placeholder="Passwort" required>
+            <button onclick="register()">Registrieren</button>
+            <p>Bereits einen Account? <a href="#" onclick="toggleAuthMode()">Anmelden</a></p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+            authDomain: "stories-c4b2e.firebaseapp.com",
+            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+            projectId: "stories-c4b2e",
+            storageBucket: "stories-c4b2e.appspot.com",
+            messagingSenderId: "843705586806",
+            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+            measurementId: "G-TGV27NXDRD"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+
+        // Anmeldefunktion
+        function login() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const loginMessage = document.getElementById('loginMessage');
+
+            loginMessage.innerText = "Anmeldung läuft...";
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    loginMessage.innerText = "Anmeldung erfolgreich!";
+                    // Nach erfolgreicher Anmeldung zur TestX.html umleiten
+                    window.location.href = "StoryX.html"; // Deine Hauptseite
+                })
+                .catch((error) => {
+                    loginMessage.innerText = `Fehler: ${error.message}`;
+                });
+        }
+
+        // Registrierungsfunktion
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const registerMessage = document.getElementById('registerMessage');
+
+            registerMessage.innerText = "Registrierung läuft...";
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Der Benutzer ist jetzt registriert und eingeloggt
+                    const user = userCredential.user;
+                    // Optional: Speichern des Benutzernamens in der Datenbank
+                    const userId = user.uid;
+                    firebase.database().ref(`users/${userId}`).set({
+                        username: username,
+                        email: email
+                    });
+
+                    registerMessage.innerText = "Registrierung erfolgreich!";
+                    // Nach erfolgreicher Registrierung zur TestX.html umleiten
+                    window.location.href = "StoryX.html"; // Deine Hauptseite
+                })
+                .catch((error) => {
+                    registerMessage.innerText = `Fehler: ${error.message}`;
+                });
+        }
+
+        // Funktion zum Umschalten zwischen Anmelden und Registrieren
+        function toggleAuthMode() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

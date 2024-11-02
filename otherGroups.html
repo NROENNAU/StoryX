@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weitere Gruppen</title>
+    <link rel="stylesheet" href="StoryX.css">
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <style>
+        /* Stil für Gruppenanzeige */
+        #groupsContainer {
+            margin: 20px;
+        }
+
+        #groupsList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #groupsList li {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .current-group {
+            background-color: #d1f0d1; /* Helle Hintergrundfarbe für aktuelle Gruppe */
+        }
+
+        .admin-icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 8px;
+        }
+
+        .delete-button {
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .user-icon {
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+
+        .current-group-name {
+            flex-grow: 1;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Stil für Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ccc;
+        }
+
+        .footer button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #bdc3c7; /* Grau für alle Buttons */
+            color: white;
+            font-size: 14px;
+        }
+
+        .footer button:hover {
+            background-color: #95a5a6; /* Dunkleres Grau beim Hover */
+        }
+
+        .back-button {
+            padding: 15px; /* Größerer Abstand für den Zurück-Button */
+            font-size: 16px; /* Größere Schriftgröße */
+            background-color: #bdc3c7; /* Grau */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background-color: #95a5a6; /* Dunkleres Grau beim Hover */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-button" onclick="goBack()">Zurück</button>
+        <div class="current-group-name" id="currentGroupName">Aktuelle Gruppe: N/A</div>
+        <img src="path/to/user-icon.png" alt="Benutzer" class="user-icon" onclick="showCurrentUser()" />
+    </div>
+
+    <div id="groupsContainer">
+        <h2>Meine Gruppen</h2>
+        <ul id="groupsList"></ul>
+    </div>
+
+    <div class="footer">
+        <button onclick="joinGroup()">Gruppe beitreten</button>
+        <button onclick="createGroup()">Gruppe erstellen</button>
+			<button onclick="copyGroupId()">ID kopieren</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+            authDomain: "stories-c4b2e.firebaseapp.com",
+            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+            projectId: "stories-c4b2e",
+            storageBucket: "stories-c4b2e.appspot.com",
+            messagingSenderId: "843705586806",
+            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+            measurementId: "G-TGV27NXDRD"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        let currentUser;
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                loadUserGroups(user.uid);
+            } else {
+                alert("Bitte melden Sie sich an.");
+                window.location.href = "login.html";
+            }
+        });
+
+        function loadUserGroups(userId) {
+    const groupsList = document.getElementById('groupsList');
+    groupsList.innerHTML = ''; // Leere Liste zurücksetzen
+
+    firebase.database().ref('groups').once('value').then(groupsSnapshot => {
+        groupsSnapshot.forEach(groupSnapshot => {
+            const groupData = groupSnapshot.val();
+            if (groupData.members && groupData.members[userId]) {
+                const listItem = document.createElement('li');
+                listItem.textContent = groupData.name;
+
+                const isAdmin = groupData.creator === userId; // Ersteller prüfen
+                if (isAdmin) {
+                    const crownIcon = document.createElement('img');
+                    crownIcon.src = 'path/to/crown-icon.png'; // Hier den Pfad zum Kronen-Icon einfügen
+                    crownIcon.alt = 'Administrator';
+                    crownIcon.classList.add('admin-icon');
+                    listItem.appendChild(crownIcon);
+                }
+
+                // Button zum Wechseln der Gruppe
+                const switchButton = document.createElement('button');
+                switchButton.textContent = 'Wechseln';
+                switchButton.classList.add('switch-button');
+                switchButton.onclick = () => switchGroup(userId, groupSnapshot.key); // Funktion aufrufen beim Klicken
+                listItem.appendChild(switchButton);
+
+                // Löschen-Button nur für Admins
+                if (isAdmin) {
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Löschen';
+                    deleteButton.classList.add('delete-button');
+                    deleteButton.onclick = () => deleteGroup(groupSnapshot.key);
+                    listItem.appendChild(deleteButton);
+                }
+
+                firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(currentGroupSnapshot => {
+                    const userGroupId = currentGroupSnapshot.val();
+                    if (groupSnapshot.key === userGroupId) {
+                        listItem.classList.add('current-group');
+                        document.getElementById('currentGroupName').textContent = "Aktuelle Gruppe: " + groupData.name;
+                    }
+                });
+
+                groupsList.appendChild(listItem);
+            }
+        });
+    });
+}
+
+        function switchGroup(userId, newGroupId) {
+            firebase.database().ref('users/' + userId).update({ currentGroup: newGroupId }).then(() => {
+                alert("Erfolgreich in die neue Gruppe gewechselt.");
+                loadUserGroups(userId);
+            }).catch((error) => {
+                alert("Fehler beim Wechseln der Gruppe: " + error.message);
+            });
+        }
+
+        function deleteGroup(groupId) {
+            if (confirm("Sind Sie sicher, dass Sie diese Gruppe löschen möchten?")) {
+                firebase.database().ref('groups/' + groupId).remove().then(() => {
+                    alert("Gruppe erfolgreich gelöscht.");
+                    loadUserGroups(currentUser.uid); // Lade die Gruppen neu
+                }).catch((error) => {
+                    alert("Fehler beim Löschen der Gruppe: " + error.message);
+                });
+            }
+        }
+
+        function goBack() {
+            window.location.href = "StoryX.html";
+        }
+
+        function showCurrentUser() {
+            if (currentUser) {
+                const username = currentUser.displayName || currentUser.email || "Benutzername nicht verfügbar";
+                alert("Aktueller Benutzer: " + username);
+            } else {
+                alert("Keine Benutzerdaten verfügbar.");
+            }
+        }
+
+            // Funktion zum Beitreten einer Gruppe
+    function joinGroup() {
+        const groupId = prompt("Geben Sie die ID der Gruppe ein, der Sie beitreten möchten:");
+        if (groupId) {
+            firebase.database().ref('groups/' + groupId).once('value').then(groupSnapshot => {
+                const groupData = groupSnapshot.val();
+                if (groupData) {
+                    if (groupData.isPublic) {
+                        // Gruppe ist öffentlich, Benutzer kann beitreten
+                        addUserToGroup(groupId);
+                    } else {
+                        // Gruppe ist privat, Benutzer muss eingeladen werden
+                        checkInvitation(groupId);
+                    }
+                } else {
+                    alert("Gruppe nicht gefunden.");
+                }
+            }).catch((error) => {
+                alert("Fehler beim Überprüfen der Gruppe: " + error.message);
+            });
+        }
+    }
+
+    function addUserToGroup(groupId) {
+        firebase.database().ref('groups/' + groupId + '/members/' + currentUser.uid).set(true).then(() => {
+            alert("Erfolgreich der Gruppe beigetreten.");
+            loadUserGroups(currentUser.uid);
+        }).catch((error) => {
+            alert("Fehler beim Beitreten der Gruppe: " + error.message);
+        });
+    }
+
+    function checkInvitation(groupId) {
+        firebase.database().ref('invitations/' + groupId + '/' + currentUser.uid).once('value').then(invitationSnapshot => {
+            if (invitationSnapshot.exists()) {
+                addUserToGroup(groupId);
+            } else {
+                alert("Sie sind nicht berechtigt, dieser privaten Gruppe beizutreten. Sie benötigen eine Einladung.");
+            }
+        }).catch((error) => {
+            alert("Fehler beim Überprüfen der Einladung: " + error.message);
+        });
+    }
+
+    // Funktion zum Erstellen einer Gruppe
+function createGroup() {
+    const groupName = prompt("Geben Sie den Namen der neuen Gruppe ein:");
+    if (groupName) {
+        const newGroupRef = firebase.database().ref('groups').push();
+        newGroupRef.set({
+            name: groupName,
+            creator: currentUser.uid,
+            members: {
+                [currentUser.uid]: true // Aktuellen Benutzer als Mitglied hinzufügen
+            },
+            isPublic: true // Sichtbarkeit der Gruppe immer auf öffentlich setzen
+        }).then(() => {
+            alert("Gruppe erfolgreich erstellt.");
+            loadUserGroups(currentUser.uid); // Lade die Gruppen neu
+        }).catch((error) => {
+            alert("Fehler beim Erstellen der Gruppe: " + error.message);
+        });
+    } else {
+        alert("Gruppenname darf nicht leer sein.");
+    }
+}
+
+   
+
+function copyGroupId() {
+    firebase.database().ref('users/' + currentUser.uid + '/currentGroup').once('value').then(snapshot => {
+        const currentGroupId = snapshot.val(); // Holen der aktuellen Gruppen-ID
+
+        if (currentGroupId) {
+            // Erstellen des Pop-ups mit Eingabefeld
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.left = '50%';
+            popup.style.top = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.padding = '20px';
+            popup.style.backgroundColor = '#fff';
+            popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            popup.style.zIndex = '1000';
+
+            const message = document.createElement('p');
+            message.textContent = "Gruppen-ID, um deine Freunde einzuladen:";
+            popup.appendChild(message);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentGroupId; // Setze den Wert auf die Gruppen-ID
+            input.style.width = '100%';
+            input.style.marginBottom = '10px';
+            popup.appendChild(input);
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'ID kopieren';
+            copyButton.onclick = () => {
+                navigator.clipboard.writeText(currentGroupId).then(() => {
+                    alert("Gruppen-ID in die Zwischenablage kopiert: " + currentGroupId);
+                }).catch(err => {
+                    console.error('Fehler beim Kopieren: ', err);
+                    alert('Fehler beim Kopieren der ID: ' + err);
+                });
+                document.body.removeChild(popup); // Schließe das Pop-up nach dem Kopieren
+            };
+            popup.appendChild(copyButton);
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Schließen';
+            closeButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
+            popup.appendChild(closeButton);
+
+            document.body.appendChild(popup); // Füge das Pop-up zum Dokument hinzu
+        } else {
+            alert("Keine aktuelle Gruppen-ID gefunden.");
+        }
+    }).catch(err => {
+        console.error('Fehler beim Abrufen der Gruppen-ID: ', err);
+        alert('Fehler beim Abrufen der Gruppen-ID: ' + err);
+    });
+}
+</script>
+</body>
+</html>

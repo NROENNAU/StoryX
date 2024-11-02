@@ -1,0 +1,400 @@
+/* Allgemeine Seiteneinstellungen */
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #2f2f2f;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Hidden class to toggle visibility */
+.hidden {
+  display: none; /* Hides the element */
+}
+
+/* Header and footer styles */
+.header, .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: black; /* Set header text color */
+}
+
+.app-name, .group-title, .user-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+/* Story item */
+.story-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee; /* Trennlinie zwischen Geschichten */
+  display: flex; /* Flexbox für Anordnung */
+  justify-content: space-between; /* Platz zwischen Inhalten */
+  align-items: center; /* Vertikale Ausrichtung */
+}
+
+/* Full-height content container (excluding header and footer) */
+.fullscreen-content-container {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+  flex-grow: 1; /* Fills available space between header and footer */
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Box and story styles */
+.story-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+  text-align: center;
+}
+
+.story-text {
+  font-size: 500%;
+  margin-bottom: 10px;
+}
+
+/* Button styles */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 20px 0;
+}
+
+.button {
+  font-size: 20px;
+  padding: 15px 25px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  color: black;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Input fields and form styling */
+.login-container, .register-container, .auth-box {
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Inner spacing */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  max-width: 400px; /* Limit width */
+  margin: 50px auto; /* Center horizontally */
+  text-align: center; /* Center text */
+}
+
+.login-container input,
+.register-container input,
+.auth-box input {
+  width: 100%; /* Full width */
+  padding: 10px; /* Inner spacing */
+  margin: 10px 0; /* Spacing between inputs */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 5px; /* Rounded corners */
+  box-sizing: border-box; /* Include padding and border in width */
+}
+
+/* Button styling for forms */
+.login-container button,
+.register-container button,
+.auth-box button {
+  width: 100%; /* Full width */
+  padding: 10px; /* Inner spacing */
+  background-color: #007BFF; /* Primary color */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer on hover */
+  font-size: 16px; /* Font size */
+}
+
+.login-container button:hover,
+.register-container button:hover,
+.auth-box button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Story list container */
+.story-list-container {
+  max-height: 400px; /* Maximalhöhe für Scrollen */
+  overflow-y: auto; /* Aktivieren des Scrollens */
+  border: 1px solid #ccc; /* Rahmen für den Container */
+  padding: 10px; /* Innenabstand */
+  background-color: rgba(255, 255, 255, 0.8); /* Halbdurchsichtiger Hintergrund */
+  margin-top: 5px; /* Abstand nach oben */
+}
+
+
+
+/* Delete button styling */
+.delete-button {
+  background-color: #dc3545; /* Rote Hintergrundfarbe */
+  color: white; /* Textfarbe */
+  padding: 5px 10px; /* Innenabstand */
+  border: none; /* Kein Rahmen */
+  border-radius: 5px; /* Abgerundete Ecken */
+  cursor: pointer; /* Zeiger bei Hover */
+}
+
+.delete-button:hover {
+  background-color: #c82333; /* Dunklere Farbe bei Hover */
+}
+
+.story-item:last-child {
+  border-bottom: none; /* Last story without divider */
+}
+
+.story-content {
+  font-size: 16px;
+}
+
+/* Form styles */
+#storyForm {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+#storyForm h2 {
+  margin: 0 0 10px;
+}
+
+#storyForm h3 {
+  margin: 0 0 5px;
+}
+
+h2 {
+    font-size: 24px; /* Beispielgröße für h2 */
+}
+
+h3 {
+    font-size: 18px; /* Kleinere Schriftgröße für h3 */
+    color: #555; /* Optional: Ändere die Farbe für h3 */
+}
+
+#storyForm input,
+#storyForm textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#storyForm button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#storyForm button:hover {
+  background-color: #218838;
+}
+
+#randomStoryContainer {
+  background-color: #ffffff; /* Weißer Hintergrund für den Container */
+  border-radius: 12px; /* Abgerundete Ecken */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Intensiverer Schatten für Tiefe */
+  padding: 30px; /* Innenabstand */
+  margin: 20px; /* Außenabstand */
+  max-width: 2000px; /* Maximale Breite */
+  width: 90%; /* Responsive Breite */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Übergangseffekte */
+justify-content: center;
+  align-items: center;
+}
+
+#randomStoryContainer:hover {
+  transform: translateY(-5px); /* Leichtes Anheben bei Hover */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); /* Schatten verstärken bei Hover */
+}
+
+.story-box {
+  text-align: center; /* Zentrierte Texte */
+}
+
+.story-text {
+  font-size: 1.25em; /* Größere Schriftgröße für die Story */
+  color: #343a40; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+  margin: 15px 0; /* Abstand über und unter dem Text */
+  line-height: 1.6; /* Zeilenhöhe für besseren Lesefluss */
+}
+
+.button-container {
+  margin-top: 25px; /* Abstand über dem Button-Container */
+}
+.reaction-container {
+  margin-top: 20px; /* Abstand über dem Reaktionsbereich */
+  text-align: center; /* Zentrierter Text */
+}
+
+.reaction-button {
+  background-color: #6c757d; /* Graue Hintergrundfarbe für die Reaktionsbuttons */
+  color: white; /* Schriftfarbe */
+  padding: 10px 15px; /* Innenabstand der Buttons */
+  border: none; /* Keine Rahmen */
+  border-radius: 5px; /* Abgerundete Ecken */
+  cursor: pointer; /* Handcursor beim Hover */
+  font-size: 1.2em; /* Größere Schriftgröße */
+  margin: 5px; /* Abstand zwischen den Buttons */
+  transition: background-color 0.3s ease; /* Übergangseffekt */
+}
+
+.reaction-button:hover {
+  background-color: #5a6268; /* Dunklere Farbe beim Hover */
+}
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Halbtransparenter Hintergrund */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Über anderen Elementen anzeigen */
+}
+
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px; /* Breite des Pop-ups */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hidden {
+  display: none; /* Hilfs-Klasse, um Elemente zu verstecken */
+}
+.reaction-count {
+    font-size: smaller; /* Setze die Schriftgröße auf kleiner */
+}
+.versions-container {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.versions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.version-item {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fff;
+  transition: background-color 0.3s;
+}
+
+.version-item:hover {
+  background-color: #f0f0f0;
+}
+
+.version-user-id {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.version-content {
+  color: #333;
+}
+.switch-button {
+    padding: 5px 10px;
+    background-color: #3498db; /* Blau für den Wechsel-Button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px; /* Abstand zu anderen Buttons */
+}
+
+.switch-button:hover {
+    background-color: #2980b9; /* Dunkleres Blau beim Hover */
+}
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+/* Header styles */
+.story-title {
+  font-size: 2.5em; /* Größere Schriftgröße für die Überschrift */
+  color: #343a40; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+  margin-bottom: 15px; /* Mehr Platz unter der Überschrift */
+}
+
+.story-subtitle {
+  font-size: 1.2em; /* Kleinere Schriftgröße für den Untertitel */
+  color: #555; /* Hellere Farbe für den Untertitel */
+  margin-bottom: 20px; /* Abstand nach unten */
+}
+
+/* Textarea styles */
+#storyInput {
+  width: 100%; /* Volle Breite */
+  height: 100px; /* Größeres Textfeld */
+  padding: 10px; /* Innenabstand */
+  border: 1px solid #ccc; /* Rahmenfarbe */
+  border-radius: 5px; /* Abgerundete Ecken */
+  box-sizing: border-box; /* Padding in Breite einbeziehen */
+  font-size: 1em; /* Schriftgröße im Textfeld */
+  resize: none; /* Verhindert das manuelle Vergrößern */
+}
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Informationen</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .story-info {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: grey;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Story Informationen</h1>
+    <div class="story-info" id="storyInfo">Lade Story Informationen...</div>
+
+    <h2>Neue Version anlegen</h2>
+    <form id="versionForm">
+        <textarea id="versionText" placeholder="Gib den Text für die neue Version ein..." required></textarea>
+        <input type="file" id="versionImage" accept="image/*" multiple>
+        <button type="submit">Version speichern</button>
+    </form>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+            authDomain: "stories-c4b2e.firebaseapp.com",
+            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+            projectId: "stories-c4b2e",
+            storageBucket: "stories-c4b2e.appspot.com",
+            messagingSenderId: "843705586806",
+            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+            measurementId: "G-TGV27NXDRD"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+
+        let currentUser;
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                loadStoryInfo(user.uid);
+            } else {
+                alert("Bitte melden Sie sich an.");
+                window.location.href = "login.html";
+            }
+        });
+
+        function loadStoryInfo(userId) {
+            const storyInfoElement = document.getElementById('storyInfo');
+            storyInfoElement.textContent = 'Lade Story Informationen...'; // Platzhalter
+
+            // Aktuelle Story-ID des Benutzers abrufen
+            firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
+                const storyId = storyIdSnapshot.val();
+                if (storyId) {
+                    // Aktuelle Gruppe des Benutzers abrufen
+                    return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                        const groupId = groupIdSnapshot.val();
+                        if (groupId) {
+                            // Story-Daten aus der Gruppe abrufen
+                            return firebase.database().ref('groups/' + groupId + '/stories/' + storyId).once('value');
+                        } else {
+                            throw new Error('Keine Gruppe gefunden.');
+                        }
+                    });
+                } else {
+                    throw new Error('Keine Story-ID gefunden.');
+                }
+            }).then(storySnapshot => {
+                const storyData = storySnapshot.val();
+                if (storyData) {
+                    // Story-Informationen anzeigen
+                    storyInfoElement.innerHTML = `
+                        <strong>Story:</strong> ${storyData.text} <br>
+                    `;
+                } else {
+                    storyInfoElement.textContent = 'Keine Informationen zur Story gefunden.';
+                }
+            }).catch(error => {
+                console.error("Fehler beim Laden der Story Informationen:", error);
+                storyInfoElement.textContent = 'Fehler beim Laden der Story Informationen.';
+            });
+        }
+
+        document.getElementById('versionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const versionText = document.getElementById('versionText').value;
+            const versionImage = document.getElementById('versionImage').files;
+
+            // Speichern der Version
+            saveVersion(versionText, versionImage);
+        });
+
+        function saveVersion(text, images) {
+            const userId = currentUser.uid;
+
+            // Aktuelle Story-ID abrufen
+            firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
+                const storyId = storyIdSnapshot.val();
+                return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                    const groupId = groupIdSnapshot.val();
+                    if (groupId) {
+                        const storyRef = firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions');
+                        // Überprüfen, ob bereits eine Version existiert
+                        return storyRef.once('value').then(versionSnapshot => {
+                            if (versionSnapshot.exists()) {
+                                alert('Es existiert bereits eine Version für diese Story.');
+                                throw new Error('Es existiert bereits eine Version.');
+                            } else {
+                                const newVersionRef = storyRef.push(); // Eine neue Version unter "versions" erstellen
+
+                                // Speichern der Bild-URLs
+                                const uploadPromises = [];
+                                for (let i = 0; i < images.length; i++) {
+                                    const imageFile = images[i];
+                                    const storageRef = firebase.storage().ref('story_versions/' + newVersionRef.key + '/' + imageFile.name);
+                                    uploadPromises.push(storageRef.put(imageFile).then(snapshot => {
+                                        return snapshot.ref.getDownloadURL();
+                                    }));
+                                }
+
+                                return Promise.all(uploadPromises).then(imageURLs => {
+                                    // Version speichern
+                                    return newVersionRef.set({
+                                        text: text,
+                                        images: imageURLs,
+                                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                                        creator: userId
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        throw new Error('Keine Gruppe gefunden.');
+                    }
+                });
+            }).then(() => {
+                alert('Version erfolgreich gespeichert!');
+                document.getElementById('versionForm').reset(); // Formular zurücksetzen
+                window.location.href = 'StoryX.html'; // Umleitung zur StoryX.html
+            }).catch(error => {
+                console.error("Fehler beim Speichern der Version:", error);
+                alert('Fehler beim Speichern der Version.');
+            });
+        }
+    </script>
+</body>
+</html>

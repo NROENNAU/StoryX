@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versionen der Story</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .version-list {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .version-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+
+        .version-item img {
+            width: 100px;  /* Vorschau-Breite */
+            height: 100px; /* Vorschau-Höhe */
+            object-fit: cover; /* Bild zentriert zuschneiden */
+            border-radius: 5px;
+            cursor: pointer; /* Zeiger-Cursor für klickbare Bilder */
+        }
+
+        .version-text {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .delete-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .back-button {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Styles für das große Bild */
+        .modal {
+            display: none; /* Versteckt standardmäßig */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.9);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="back-button" onclick="window.location.href='StoryX.html'">Zurück</button>
+    <h1>Versionen der Story</h1>
+    <div class="version-list" id="versionList">Lade Versionen...</div>
+
+    <!-- Modal für das große Bild -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+            authDomain: "stories-c4b2e.firebaseapp.com",
+            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+            projectId: "stories-c4b2e",
+            storageBucket: "stories-c4b2e.appspot.com",
+            messagingSenderId: "843705586806",
+            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+            measurementId: "G-TGV27NXDRD"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+
+        let currentUser;
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                loadVersions(user.uid);
+            } else {
+                alert("Bitte melden Sie sich an.");
+                window.location.href = "login.html";
+            }
+        });
+
+        function loadVersions(userId) {
+            const versionListElement = document.getElementById('versionList');
+            versionListElement.textContent = 'Lade Versionen...'; // Platzhalter
+
+            // Aktuelle Story-ID des Benutzers abrufen
+            firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
+                const storyId = storyIdSnapshot.val();
+                if (storyId) {
+                    // Aktuelle Gruppe des Benutzers abrufen
+                    return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                        const groupId = groupIdSnapshot.val();
+                        if (groupId) {
+                            // Versionen der Story abrufen
+                            return firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions').once('value');
+                        } else {
+                            throw new Error('Keine Gruppe gefunden.');
+                        }
+                    });
+                } else {
+                    throw new Error('Keine Story-ID gefunden.');
+                }
+            }).then(versionSnapshot => {
+                versionListElement.innerHTML = ''; // Vorherigen Inhalt löschen
+
+                versionSnapshot.forEach(version => {
+                    const versionData = version.val();
+                    const versionItem = document.createElement('div');
+                    versionItem.className = 'version-item';
+
+                    // Bilder hinzufügen
+                    if (versionData.images && versionData.images.length > 0) {
+                        versionData.images.forEach(imageURL => {
+                            const img = document.createElement('img');
+                            img.src = imageURL;
+                            img.onclick = function() {
+                                openModal(imageURL); // Modal öffnen und Bild zeigen
+                            };
+                            versionItem.appendChild(img);
+                        });
+                    }
+
+                    // Text der Version hinzufügen
+                    const versionText = document.createElement('div');
+                    versionText.className = 'version-text';
+                    versionText.textContent = versionData.text;
+                    versionItem.appendChild(versionText);
+
+                    // Delete Button
+                    if (currentUser.uid === versionData.creator) {
+                        const deleteButton = document.createElement('button');
+                        deleteButton.className = 'delete-button';
+                        deleteButton.textContent = 'Version löschen';
+                        deleteButton.onclick = function() {
+                            deleteVersion(groupId, storyId, version.key);
+                        };
+                        versionItem.appendChild(deleteButton);
+                    }
+
+                    versionListElement.appendChild(versionItem);
+                });
+
+                if (versionSnapshot.numChildren() === 0) {
+                    versionListElement.textContent = 'Keine Versionen gefunden.';
+                }
+            }).catch(error => {
+                console.error("Fehler beim Laden der Versionen:", error);
+                versionListElement.textContent = 'Fehler beim Laden der Versionen.';
+            });
+        }
+
+        function openModal(imageUrl) {
+            const modal = document.getElementById("myModal");
+            const modalImg = document.getElementById("img01");
+            modal.style.display = "block";
+            modalImg.src = imageUrl;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("myModal");
+            modal.style.display = "none";
+        }
+
+        function deleteVersion(groupId, storyId, versionId) {
+            if (confirm("Möchten Sie diese Version wirklich löschen?")) {
+                firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions/' + versionId).remove()
+                    .then(() => {
+                        alert('Version erfolgreich gelöscht!');
+                        loadVersions(currentUser.uid); // Liste neu laden
+                    })
+                    .catch(error => {
+                        console.error("Fehler beim Löschen der Version:", error);
+                        alert('Fehler beim Löschen der Version.');
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
