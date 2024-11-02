@@ -212,13 +212,13 @@ h3 {
   border-radius: 12px; /* Abgerundete Ecken */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Intensiverer Schatten für Tiefe */
   padding: 20px; /* Innenabstand */
-  margin: 10px; /* Außenabstand */
-  max-width: 100%; /* Maximale Breite */
-  width: 100%; /* Responsive Breite */
+  margin: 10px auto; /* Zentriert den Container horizontal */
+  max-width: 100%; /* Optional: maximale Breite, um den Container einzuschränken */
+  width: 80%; /* Responsive Breite */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Übergangseffekte */
-justify-content: center;
-  align-items: center;
+  box-sizing: border-box; /* Stellt sicher, dass Padding in der Breite enthalten ist */
 }
+
 
 #randomStoryContainer:hover {
   transform: translateY(-5px); /* Leichtes Anheben bei Hover */
