@@ -125,6 +125,12 @@
       <button onclick="logout()">Abmelden</button>
       <button onclick="goBack()">Zurück</button> <!-- Der neue Zurück-Button -->
     </div>
+
+    <div class="button-container">
+  <input type="file" id="profileImageInput" accept="image/*">
+  <button onclick="uploadProfileImage()">Profilbild hochladen</button>
+</div>
+<img id="profileImage" alt="Profilbild" style="max-width: 100%; margin-top: 20px;">
   </div>
 
   <script>
@@ -210,6 +216,55 @@
     function goBack() {
       window.location.href = "index.html"; // Leitet zu TestX.html weiter
     }
+    // Funktion zum Hochladen des Profilbildes
+function uploadProfileImage() {
+  const user = firebase.auth().currentUser;
+  const fileInput = document.getElementById("profileImageInput");
+  const file = fileInput.files[0];
+
+  if (user && file) {
+    // Referenz zu Firebase Storage
+    const storageRef = firebase.storage().ref('profileImages/' + user.uid + '/' + file.name);
+
+    // Hochladen des Bildes
+    storageRef.put(file).then((snapshot) => {
+      console.log("Bild erfolgreich hochgeladen.");
+
+      // URL des hochgeladenen Bildes abrufen
+      snapshot.ref.getDownloadURL().then((downloadURL) => {
+        // URL in der Realtime Database speichern
+        firebase.database().ref('users/' + user.uid).update({
+          profileImageUrl: downloadURL
+        }).then(() => {
+          console.log("Bild-URL gespeichert.");
+          // Das Bild anzeigen
+          document.getElementById("profileImage").src = downloadURL;
+        }).catch((error) => {
+          console.error("Fehler beim Speichern der Bild-URL:", error);
+        });
+      });
+    }).catch((error) => {
+      console.error("Fehler beim Hochladen des Bildes:", error);
+    });
+  } else {
+    alert("Bitte melden Sie sich an und wählen Sie eine Bilddatei aus.");
+  }
+}
+
+// Profilbild beim Laden der Seite anzeigen
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    // URL des Profilbildes aus der Realtime Database abrufen
+    firebase.database().ref('users/' + user.uid).once('value').then((snapshot) => {
+      const data = snapshot.val();
+      if (data && data.profileImageUrl) {
+        document.getElementById("profileImage").src = data.profileImageUrl;
+      }
+    }).catch((error) => {
+      console.error("Fehler beim Laden des Profilbildes:", error);
+    });
+  }
+});
   </script>
 </body>
 </html>
