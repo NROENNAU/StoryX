@@ -86,24 +86,25 @@
     </div>
 </div>
 
-            <!-- Create story im Body -->
+           <!-- Create story im Body -->
 <div id="addStoryContainer" class="hidden">
   <div class="story-box">
     <h2 class="story-title">Story hinzufügen</h2>
-    <h3 class="story-subtitle"Nenne ein paar Stichpunkte zu einer Story... die Details klären sich später</h3>
+    <h3 class="story-subtitle">Nenne ein paar Stichpunkte zu einer Story... die Details klären sich später</h3>
     <textarea id="storyInput" placeholder="Gib deine Story hier ein..." maxlength="50"></textarea>
     <div class="character-count" id="characterCount">0/50</div>
- 
 
-  <!-- Hidden Story Checkbox -->
-  <label>
-    <input type="checkbox" id="hiddenStoryCheckbox">
-    Diese Story als verborgen markieren
-  </label> </div>
-
-  <div class="button-container">
-    <button class="button" onclick="addStory()">Speichern</button>
-    <button class="button" onclick="cancel()">Abbrechen</button>
+    <!-- Hidden Story Checkbox -->
+    <label>
+      <input type="checkbox" id="hiddenStoryCheckbox">
+      Diese Story als verborgen markieren
+    </label>
+    
+    <!-- Button Container integriert in die Story-Box -->
+    <div class="button-container">
+      <button class="button" onclick="addStory()">Speichern</button>
+      <button class="button" onclick="cancel()">Abbrechen</button>
+    </div>
   </div>
 </div>
 
