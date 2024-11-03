@@ -101,7 +101,7 @@
 <body>
     <div id="authContainer" class="auth-container">
       <div id="loginForm">
-    <h1 style="text-align: center;">StoryX - Anmelden</h1>
+    <h1 style="text-align: center;">StoryX - Ihr seid dran!</h1>
 <p style="font-size: 0.9em; color: #555; margin-top: 0;">Erweckt eure alten Stories wieder zum Leben und teilt pikante Details, die bisher noch niemand kannte</p>
 <div id="loginMessage" class="message"></div>
 <input type="email" id="authEmail" placeholder="E-Mail" required>
@@ -147,8 +147,8 @@
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then(() => {
                     loginMessage.innerText = "Anmeldung erfolgreich!";
-                    // Nach erfolgreicher Anmeldung zur TestX.html umleiten
-                    window.location.href = "StoryX.html"; // Deine Hauptseite
+                    // Nach erfolgreicher Anmeldung zur index.html umleiten
+                    window.location.href = "index.html"; // Deine Hauptseite
                 })
                 .catch((error) => {
                     loginMessage.innerText = `Fehler: ${error.message}`;
@@ -175,7 +175,7 @@
                     });
 
                     registerMessage.innerText = "Registrierung erfolgreich!";
-                    // Nach erfolgreicher Registrierung zur TestX.html umleiten
+                    // Nach erfolgreicher Registrierung zur index.html umleiten
                     window.location.href = "StoryX.html"; // Deine Hauptseite
                 })
                 .catch((error) => {
