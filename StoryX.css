@@ -271,6 +271,9 @@ h3 {
   align-items: center;
   z-index: 1000; /* Über anderen Elementen anzeigen */
 }
+.footer .button {
+  font-size: 12px; /* Schriftgröße anpassen */
+}
 
 .popup-content {
   background-color: white;
