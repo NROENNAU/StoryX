@@ -272,7 +272,7 @@ h3 {
   z-index: 1000; /* Über anderen Elementen anzeigen */
 }
 .footer .button {
-  font-size: 06px; /* Schriftgröße anpassen */
+  font-size: 10px; /* Schriftgröße anpassen */
 }
 
 .popup-content {
