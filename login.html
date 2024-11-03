@@ -16,12 +16,14 @@
         }
 
         body {
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+    background: url('Login.jpeg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+}
 
         .auth-container {
             background: white;
@@ -98,11 +100,13 @@
 </head>
 <body>
     <div id="authContainer" class="auth-container">
-        <div id="loginForm">
-            <h1>Anmelden</h1>
-            <div id="loginMessage" class="message"></div>
-            <input type="email" id="authEmail" placeholder="E-Mail" required>
-            <input type="password" id="authPassword" placeholder="Passwort" required>
+      <div id="loginForm">
+    <h1 style="text-align: center;">StoryX - Anmelden</h1>
+<p style="font-size: 0.9em; color: #555; margin-top: 0;">Erweckt eure alten Stories wieder zum Leben und teilt pikante Details, die bisher noch niemand kannte</p>
+<div id="loginMessage" class="message"></div>
+<input type="email" id="authEmail" placeholder="E-Mail" required>
+<input type="password" id="authPassword" placeholder="Passwort" required>
+
             <button onclick="login()">Anmelden</button>
             <p>Noch keinen Account? <a href="#" onclick="toggleAuthMode()">Registrieren</a></p>
         </div>
@@ -144,7 +148,7 @@
                 .then(() => {
                     loginMessage.innerText = "Anmeldung erfolgreich!";
                     // Nach erfolgreicher Anmeldung zur TestX.html umleiten
-                    window.location.href = "index.html"; // Deine Hauptseite
+                    window.location.href = "StoryX.html"; // Deine Hauptseite
                 })
                 .catch((error) => {
                     loginMessage.innerText = `Fehler: ${error.message}`;
@@ -172,7 +176,7 @@
 
                     registerMessage.innerText = "Registrierung erfolgreich!";
                     // Nach erfolgreicher Registrierung zur TestX.html umleiten
-                    window.location.href = "index.html"; // Deine Hauptseite
+                    window.location.href = "StoryX.html"; // Deine Hauptseite
                 })
                 .catch((error) => {
                     registerMessage.innerText = `Fehler: ${error.message}`;
