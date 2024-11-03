@@ -70,7 +70,7 @@ function loadUserGroupAndStories() {
                 goToRandomStory(); // Zufällige Geschichte anzeigen
             }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
         } else {
-            document.getElementById("currentGroupName").innerText = "Keine Gruppe";
+            document.getElementById("currentGroupName").innerText = "Get started 🟢";
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
