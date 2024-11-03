@@ -49,17 +49,19 @@ body, html {
   align-items: center;
 }
 
-/* Box and story styles */
+/* Aktualisiertes CSS für story-box */
 .story-box {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  margin: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  flex-grow: 1;
-  text-align: center;
+  background-color: #ffffff; /* Gleiche Hintergrundfarbe */
+  border-radius: 12px; /* Gleiche abgerundete Ecken */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Gleicher Schatten */
+  padding: 20px; /* Gleicher Innenabstand */
+  margin: 10px auto; /* Gleiche zentrierte Ausrichtung */
+  max-width: 100%; /* Gleiche maximale Breite */
+  width: 95%; /* Gleiche Breite */
+  box-sizing: border-box; /* Gleiche Box-Sizing */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Gleiche Übergangseffekte */
+  text-align: center; /* Textausrichtung beibehalten */
 }
-
 .story-text {
   font-size: 500%;
   margin-bottom: 10px;
