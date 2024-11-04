@@ -97,6 +97,9 @@ function showAllStories() {
             storiesRef.once('value').then((snapshot) => {
                 storyListContainer.innerHTML = ''; // Vorhandene Geschichten leeren
 
+                // Array zum Speichern der Story-Elemente
+                const storiesArray = [];
+
                 snapshot.forEach((childSnapshot) => {
                     const story = childSnapshot.val();
                     const storyItem = document.createElement('div');
@@ -118,7 +121,12 @@ function showAllStories() {
                     }
 
                     storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
-                    storyListContainer.appendChild(storyItem);
+                    storiesArray.push(storyItem); // Story-Element zum Array hinzufügen
+                });
+
+                // Füge alle Story-Elemente oben im Container hinzu
+                storiesArray.reverse().forEach(item => {
+                    storyListContainer.appendChild(item);
                 });
 
                 // Füge den Event-Listener für die Suche hinzu
@@ -431,3 +439,18 @@ function redirectToVersionsPage() {
     window.location.href = 'versions.html';
 }
 
+function adjustForKeyboard() {
+  const storyListContainer = document.querySelector('.story-list-container');
+  const footer = document.querySelector('.footer');
+  
+  // Berechne die Höhe des sichtbaren Bereichs
+  const windowHeight = window.innerHeight;
+  const footerHeight = footer.offsetHeight;
+
+  // Setze die maximale Höhe der Story-Liste
+  storyListContainer.style.maxHeight = (windowHeight - footerHeight - 20) + 'px'; // 20px für Padding oder Margins
+}
+
+// Event Listener für das Resize-Ereignis
+window.addEventListener('resize', adjustForKeyboard);
+window.addEventListener('load', adjustForKeyboard); // Damit es beim ersten Laden auch angepasst wird
