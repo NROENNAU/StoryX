@@ -82,11 +82,11 @@ function hideAllContainers() {
     randomStoryContainer.classList.add('hidden');
 }
 
-// Story-Liste anzeigen
+// Function to display all stories
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
-    document.getElementById('searchContainer').classList.remove('hidden'); // Suchfunktion anzeigen
+    document.getElementById('searchContainer').classList.remove('hidden'); // Show search functionality
 
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
@@ -96,53 +96,53 @@ function showAllStories() {
         if (groupId) {
             const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
             storiesRef.once('value').then((snapshot) => {
-                storyListContainer.innerHTML = ''; // Vorhandene Geschichten leeren
+                storyListContainer.innerHTML = ''; // Clear existing stories
 
-                // Array zum Speichern der Story-Elemente
+                // Array to store story elements
                 const storiesArray = [];
 
                 snapshot.forEach((childSnapshot) => {
-    const story = childSnapshot.val();
-    const storyItem = document.createElement('div');
-    storyItem.classList.add('story-item');
+                    const story = childSnapshot.val();
+                    const storyItem = document.createElement('div');
+                    storyItem.classList.add('story-item');
 
-    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+                    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
 
-    // Container für die Buttons
-    const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('story-buttons');
+                    // Container for the buttons
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.classList.add('story-buttons');
 
-    // Bearbeiten-Button nur anzeigen, wenn der Benutzer der Ersteller ist
-    if (story.creatorId === userId) {
-        const editButton = document.createElement('button');
-        editButton.textContent = '✏️';
-        editButton.classList.add('edit-button');
-        editButton.addEventListener('click', () => {
-            openEditPopup(storyItem.dataset.storyId, story.text);
-        });
-        buttonContainer.appendChild(editButton);
-    }
+                    // Edit button, visible only if the user is the creator
+                    if (story.creatorId === userId) {
+                        const editButton = document.createElement('button');
+                        editButton.textContent = '✏️';
+                        editButton.classList.add('edit-button');
+                        editButton.addEventListener('click', () => {
+                            openEditPopup(childSnapshot.key, story.text);
+                        });
+                        buttonContainer.appendChild(editButton);
+                    }
 
-    // "New"-Button hinzufügen, der immer sichtbar ist
-    const newButton = document.createElement('button');
-    newButton.textContent = '🆕';
-    newButton.classList.add('new-button');
-    newButton.addEventListener('click', () => {
-        addNewVersion(childSnapshot.key);
-    });
-    buttonContainer.appendChild(newButton);
+                    // "Details" button, always visible
+                    const detailsButton = document.createElement('button');
+                    detailsButton.textContent = 'Details';
+                    detailsButton.classList.add('details-button');
+                    detailsButton.addEventListener('click', () => {
+                        openDetailsPopup(childSnapshot.key); // Open details pop-up
+                    });
+                    buttonContainer.appendChild(detailsButton);
 
-    storyItem.appendChild(buttonContainer);
-    storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
-    storiesArray.push(storyItem); // Story-Element zum Array hinzufügen
-});
+                    storyItem.appendChild(buttonContainer);
+                    storyItem.dataset.storyId = childSnapshot.key; // Store story ID for search
+                    storiesArray.push(storyItem); // Add story element to array
+                });
 
-                // Füge alle Story-Elemente oben im Container hinzu
+                // Add all story elements to the top of the container
                 storiesArray.reverse().forEach(item => {
                     storyListContainer.appendChild(item);
                 });
 
-                // Füge den Event-Listener für die Suche hinzu
+                // Add event listener for the search functionality
                 document.getElementById('searchInput').addEventListener('input', filterStories);
             }).catch((error) => console.error("Fehler beim Abrufen der Stories: ", error));
         } else {
@@ -151,51 +151,7 @@ function showAllStories() {
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
 
-// Funktion zum Hinzufügen einer neuen Version
-function addNewVersion(storyId) {
-    console.log("addNewVersion aufgerufen für Story-ID:", storyId); // Testmeldung
-    
-    const userId = firebase.auth().currentUser.uid;
-    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
-
-    userGroupRef.once('value').then((snapshot) => {
-        const groupId = snapshot.val();
-        if (groupId) {
-            const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
-            const newVersion = {
-                creatorId: userId,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
-            versionsRef.push(newVersion)
-                .then(() => {
-                    console.log("Neue Version erfolgreich hinzugefügt");
-                })
-                .catch((error) => console.error("Fehler beim Hinzufügen einer neuen Version: ", error));
-        }
-    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
-
-// Funktion zum Hinzufügen einer neuen Version
-function addVersion(storyId) {
-    const userId = firebase.auth().currentUser.uid;
-    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
-
-    userGroupRef.once('value').then((snapshot) => {
-        const groupId = snapshot.val();
-        if (groupId) {
-            const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
-            const newVersion = {
-                creatorId: userId,
-                // Hier kannst du weitere Eigenschaften hinzufügen, falls benötigt
-            };
-            versionsRef.push(newVersion).then(() => {
-                console.log("Neue Version erfolgreich hinzugefügt");
-                // Optional: Aktionen nach dem Hinzufügen einer Version
-            }).catch((error) => console.error("Fehler beim Hinzufügen der Version: ", error));
-        }
-    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
-
+// Function to open the edit pop-up
 function openEditPopup(storyId, currentText) {
     const popupContainer = document.createElement('div');
     popupContainer.classList.add('popup-container');
@@ -208,7 +164,7 @@ function openEditPopup(storyId, currentText) {
     popupContent.appendChild(title);
 
     const storyInput = document.createElement('textarea');
-    storyInput.value = currentText; // Aktuellen Text vorbefüllen
+    storyInput.value = currentText; // Pre-fill with current text
     popupContent.appendChild(storyInput);
 
     const saveButton = document.createElement('button');
@@ -223,7 +179,7 @@ function openEditPopup(storyId, currentText) {
             return;
         }
         updateStory(storyId, newText);
-        document.body.removeChild(popupContainer); // Schließt das Pop-up
+        document.body.removeChild(popupContainer); // Close pop-up
     };
     popupContent.appendChild(saveButton);
 
@@ -232,23 +188,24 @@ function openEditPopup(storyId, currentText) {
     deleteButton.onclick = () => {
         const confirmation = confirm('Möchten Sie diese Story wirklich löschen?');
         if (confirmation) {
-            const groupId = firebase.auth().currentUser.uid; // Anpassen je nach deinem Datenmodell
-            deleteStory(groupId, storyId);
+            deleteStory(storyId);
         }
-        document.body.removeChild(popupContainer); // Schließt das Pop-up
+        document.body.removeChild(popupContainer); // Close pop-up
     };
     popupContent.appendChild(deleteButton);
 
     const cancelButton = document.createElement('button');
     cancelButton.innerText = "Abbrechen";
     cancelButton.onclick = () => {
-        document.body.removeChild(popupContainer); // Schließt das Pop-up
+        document.body.removeChild(popupContainer); // Close pop-up
     };
     popupContent.appendChild(cancelButton);
 
     popupContainer.appendChild(popupContent);
     document.body.appendChild(popupContainer);
 }
+
+// Function to update a story
 function updateStory(storyId, newText) {
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
@@ -260,12 +217,104 @@ function updateStory(storyId, newText) {
             storyRef.update({ text: newText })
                 .then(() => {
                     console.log("Story erfolgreich aktualisiert");
-                    showAllStories(); // Liste aktualisieren
+                    showAllStories(); // Refresh the list
                 })
                 .catch((error) => console.error("Fehler beim Aktualisieren der Story: ", error));
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
+
+// Function to open the details pop-up
+function openDetailsPopup(storyId) {
+    const popup = document.createElement('div');
+    popup.classList.add('popup');
+
+    // Pop-up content
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h2>Details Optionen</h2>
+            <button id="viewDetails">Details ansehen</button>
+            <button id="insertDetails">Details einfügen</button>
+            <button id="closePopup">Schließen</button>
+        </div>
+    `;
+
+    // Append the pop-up to the body
+    document.body.appendChild(popup);
+
+    // Add event listeners for the buttons
+    document.getElementById('viewDetails').addEventListener('click', () => {
+        viewDetailsFunction(storyId); // Pass the storyId to the function
+        closePopup(popup);
+    });
+
+    document.getElementById('insertDetails').addEventListener('click', () => {
+        insertDetailsFunction(storyId); // Update story ID and redirect to addVersion.html
+        closePopup(popup);
+    });
+
+    document.getElementById('closePopup').addEventListener('click', () => {
+        closePopup(popup);
+    });
+}
+
+// Function to close the pop-up
+function closePopup(popup) {
+    document.body.removeChild(popup);
+}
+
+// Function to handle "Details ansehen"
+function viewDetailsFunction(storyId) {
+    const userId = firebase.auth().currentUser.uid;
+
+    // Update the current story ID in the user's data
+    const userStoryRef = firebase.database().ref(`users/${userId}/currentRandomStoryId`);
+
+    userStoryRef.set(storyId) // Set the new story ID
+        .then(() => {
+            console.log(`Story-ID ${storyId} erfolgreich gespeichert`);
+            window.location.href = 'versions.html'; // Redirect to versions.html
+        })
+        .catch((error) => {
+            console.error("Fehler beim Aktualisieren der Story-ID: ", error);
+        });
+}
+
+// Function to handle "Details einfügen"
+function insertDetailsFunction(storyId) {
+    const userId = firebase.auth().currentUser.uid;
+
+    // Update the current story ID in the user's data
+    firebase.database().ref(`users/${userId}/currentRandomStoryId`).set(storyId)
+        .then(() => {
+            window.location.href = 'AddVersion.html'; // Redirect to addVersion.html
+        })
+        .catch((error) => {
+            console.error("Fehler beim Aktualisieren der Story-ID: ", error);
+        });
+}
+
+// Function to delete a story
+function deleteStory(storyId) {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+        if (groupId) {
+            const storyRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}`);
+            storyRef.remove()
+                .then(() => {
+                    console.log("Story erfolgreich gelöscht");
+                    showAllStories(); // Refresh the list
+                })
+                .catch((error) => console.error("Fehler beim Löschen der Story: ", error));
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+
+
 // Funktion zur Filterung der Geschichten
 function filterStories() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
