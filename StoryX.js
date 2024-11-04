@@ -82,10 +82,10 @@ function hideAllContainers() {
     randomStoryContainer.classList.add('hidden');
 }
 
-// Funktion zur Anzeige aller Stories
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
+    document.getElementById('searchContainer').classList.remove('hidden'); // Suchfunktion anzeigen
 
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
@@ -95,34 +95,63 @@ function showAllStories() {
         if (groupId) {
             const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
             storiesRef.once('value').then((snapshot) => {
-                storyListContainer.innerHTML = '';
+                storyListContainer.innerHTML = ''; // Vorhandene Geschichten leeren
+
                 snapshot.forEach((childSnapshot) => {
                     const story = childSnapshot.val();
                     const storyItem = document.createElement('div');
                     storyItem.classList.add('story-item');
+
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
 
                     if (story.creatorId === userId) {
-    // Löschen-Button hinzufügen, wenn Benutzer der Ersteller ist
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Löschen';
-    deleteButton.classList.add('delete-button'); // CSS-Klasse hinzufügen
-    deleteButton.addEventListener('click', () => {
-        const confirmation = confirm('Möchten Sie diese Story wirklich löschen?'); // Bestätigungsdialog
-        if (confirmation) {
-            deleteStory(groupId, childSnapshot.key); // Story löschen, wenn bestätigt
-        }
-    });
-    storyItem.appendChild(deleteButton);
-}
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Löschen';
+                        deleteButton.classList.add('delete-button');
+                        deleteButton.addEventListener('click', () => {
+                            const confirmation = confirm('Möchten Sie diese Story wirklich löschen?');
+                            if (confirmation) {
+                                deleteStory(groupId, childSnapshot.key);
+                            }
+                        });
+                        storyItem.appendChild(deleteButton);
+                    }
 
+                    storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
                     storyListContainer.appendChild(storyItem);
                 });
+
+                // Füge den Event-Listener für die Suche hinzu
+                document.getElementById('searchInput').addEventListener('input', filterStories);
             }).catch((error) => console.error("Fehler beim Abrufen der Stories: ", error));
         } else {
             storyListContainer.innerHTML = "Keine Gruppe zugeordnet.";
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Funktion zur Filterung der Geschichten
+function filterStories() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const storyItems = document.querySelectorAll('.story-item');
+
+    storyItems.forEach(item => {
+        const storyContent = item.querySelector('.story-content').textContent.toLowerCase();
+        // Überprüfen, ob die Story mit dem Suchbegriff übereinstimmt
+        if (storyContent.includes(searchTerm)) {
+            item.style.display = ''; // Sichtbar
+        } else {
+            item.style.display = 'none'; // Ausblenden
+        }
+    });
+}
+
+// Wenn ein anderer Container angezeigt wird, verstecke die Suchfunktion
+function hideAllContainers() {
+    storyListContainer.classList.add('hidden');
+    addStoryContainer.classList.add('hidden');
+    randomStoryContainer.classList.add('hidden');
+    document.getElementById('searchContainer').classList.add('hidden'); // Suchfunktion ausblenden
 }
 
 // Story löschen
@@ -401,3 +430,4 @@ firebase.database().ref(`groups/${currentGroupId}/stories/${storyId}/versions`).
 function redirectToVersionsPage() {
     window.location.href = 'versions.html';
 }
+
