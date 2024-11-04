@@ -483,3 +483,28 @@ input[type="text"] {
     background-color: #f44336; /* Rote Farbe für den Löschen-Button */
     color: white; /* Weiße Schriftfarbe */
 }
+
+.story-item {
+    display: flex;
+    justify-content: space-between; /* Verteilt Inhalt mit Platz dazwischen */
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.story-content {
+    flex: 1; /* Story-Inhalt nimmt den gesamten verfügbaren Platz ein */
+}
+
+.story-buttons {
+    display: flex;
+    gap: 10px; /* Abstand zwischen den Buttons */
+}
+
+.edit-button,
+.new-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
