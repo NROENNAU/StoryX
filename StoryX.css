@@ -423,3 +423,63 @@ h3 {
 input[type="text"] {
     touch-action: manipulation; /* Verhindert das Zoomen beim Klicken */
 }
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Hoch genug, um über andere Elemente zu liegen */
+}
+
+.popup-content {
+    background-color: #fff; /* Weißer Hintergrund für den Popup-Inhalt */
+    padding: 20px;
+    border-radius: 10px; /* Abgerundete Ecken */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Schatten für Tiefe */
+    max-width: 400px; /* Maximale Breite */
+    width: 90%; /* Breite auf 90% des Bildschirms */
+}
+
+.popup-content h2 {
+    margin: 0 0 15px 0; /* Abstand unter dem Titel */
+    font-size: 24px; /* Schriftgröße des Titels */
+}
+
+.popup-content textarea {
+    width: 100%; /* Textarea auf volle Breite */
+    height: 100px; /* Höhe der Textarea */
+    padding: 10px; /* Innenabstand */
+    border: 1px solid #ccc; /* Rahmen */
+    border-radius: 5px; /* Abgerundete Ecken */
+    resize: none; /* Kein Resizing der Textarea */
+    font-size: 16px; /* Schriftgröße */
+}
+
+.popup-content button {
+    margin-top: 10px; /* Abstand oben für den Button */
+    padding: 10px 15px; /* Innenabstand */
+    border: none; /* Kein Rahmen */
+    border-radius: 5px; /* Abgerundete Ecken */
+    cursor: pointer; /* Hand-Cursor beim Hover */
+    font-size: 16px; /* Schriftgröße */
+}
+
+.popup-content button:hover {
+    background-color: #f0f0f0; /* Helle Hintergrundfarbe beim Hover */
+}
+
+.popup-content button:nth-of-type(1) {
+    background-color: #4CAF50; /* Grüne Farbe für den Speichern-Button */
+    color: white; /* Weiße Schriftfarbe */
+}
+
+.popup-content button:nth-of-type(2) {
+    background-color: #f44336; /* Rote Farbe für den Löschen-Button */
+    color: white; /* Weiße Schriftfarbe */
+}
