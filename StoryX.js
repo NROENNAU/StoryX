@@ -82,6 +82,7 @@ function hideAllContainers() {
     randomStoryContainer.classList.add('hidden');
 }
 
+// Story-Liste anzeigen
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
@@ -101,27 +102,40 @@ function showAllStories() {
                 const storiesArray = [];
 
                 snapshot.forEach((childSnapshot) => {
-                    const story = childSnapshot.val();
-                    const storyItem = document.createElement('div');
-                    storyItem.classList.add('story-item');
+    const story = childSnapshot.val();
+    const storyItem = document.createElement('div');
+    storyItem.classList.add('story-item');
 
-                    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
 
-                    if (story.creatorId === userId) {
-                        const editButton = document.createElement('button');
-                        editButton.textContent = '✏️';
-                        editButton.classList.add('edit-button');
-                        editButton.addEventListener('click', () => {
-                            openEditPopup(storyItem.dataset.storyId, story.text);
-                        });
-                        storyItem.appendChild(editButton);
+    // Container für die Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('story-buttons');
 
-                        // Löschen-Button entfernt
-                    }
+    // Bearbeiten-Button nur anzeigen, wenn der Benutzer der Ersteller ist
+    if (story.creatorId === userId) {
+        const editButton = document.createElement('button');
+        editButton.textContent = '✏️';
+        editButton.classList.add('edit-button');
+        editButton.addEventListener('click', () => {
+            openEditPopup(storyItem.dataset.storyId, story.text);
+        });
+        buttonContainer.appendChild(editButton);
+    }
 
-                    storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
-                    storiesArray.push(storyItem); // Story-Element zum Array hinzufügen
-                });
+    // "New"-Button hinzufügen, der immer sichtbar ist
+    const newButton = document.createElement('button');
+    newButton.textContent = '🆕';
+    newButton.classList.add('new-button');
+    newButton.addEventListener('click', () => {
+        addNewVersion(childSnapshot.key);
+    });
+    buttonContainer.appendChild(newButton);
+
+    storyItem.appendChild(buttonContainer);
+    storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
+    storiesArray.push(storyItem); // Story-Element zum Array hinzufügen
+});
 
                 // Füge alle Story-Elemente oben im Container hinzu
                 storiesArray.reverse().forEach(item => {
@@ -133,6 +147,51 @@ function showAllStories() {
             }).catch((error) => console.error("Fehler beim Abrufen der Stories: ", error));
         } else {
             storyListContainer.innerHTML = "Keine Gruppe zugeordnet.";
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Funktion zum Hinzufügen einer neuen Version
+function addNewVersion(storyId) {
+    console.log("addNewVersion aufgerufen für Story-ID:", storyId); // Testmeldung
+    
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+        if (groupId) {
+            const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
+            const newVersion = {
+                creatorId: userId,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            versionsRef.push(newVersion)
+                .then(() => {
+                    console.log("Neue Version erfolgreich hinzugefügt");
+                })
+                .catch((error) => console.error("Fehler beim Hinzufügen einer neuen Version: ", error));
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Funktion zum Hinzufügen einer neuen Version
+function addVersion(storyId) {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+        if (groupId) {
+            const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
+            const newVersion = {
+                creatorId: userId,
+                // Hier kannst du weitere Eigenschaften hinzufügen, falls benötigt
+            };
+            versionsRef.push(newVersion).then(() => {
+                console.log("Neue Version erfolgreich hinzugefügt");
+                // Optional: Aktionen nach dem Hinzufügen einer Version
+            }).catch((error) => console.error("Fehler beim Hinzufügen der Version: ", error));
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
