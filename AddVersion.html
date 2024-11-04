@@ -47,6 +47,21 @@
         button:hover {
             background-color: #45a049;
         }
+
+        #deleteVersionButton {
+            display: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #deleteVersionButton:hover {
+            background-color: darkred;
+        }
     </style>
 </head>
 <body>
@@ -60,23 +75,24 @@
         <input type="file" id="versionImage" accept="image/*" multiple>
         <button type="submit">Version speichern</button>
     </form>
+    <button id="deleteVersionButton">Version löschen</button>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
-            authDomain: "stories-c4b2e.firebaseapp.com",
-            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
-            projectId: "stories-c4b2e",
-            storageBucket: "stories-c4b2e.appspot.com",
-            messagingSenderId: "843705586806",
-            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
-            measurementId: "G-TGV27NXDRD"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+    authDomain: "stories-c4b2e.firebaseapp.com",
+    databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+    projectId: "stories-c4b2e",
+    storageBucket: "stories-c4b2e.appspot.com",
+    messagingSenderId: "843705586806",
+    appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+    measurementId: "G-TGV27NXDRD"
+};
 
-        // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
 
         let currentUser;
+        let currentVersionRef = null; // Verweis auf die vorhandene Version, falls vorhanden
 
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
@@ -90,35 +106,40 @@
 
         function loadStoryInfo(userId) {
             const storyInfoElement = document.getElementById('storyInfo');
-            storyInfoElement.textContent = 'Lade Story Informationen...'; // Platzhalter
+            storyInfoElement.textContent = 'Lade Story Informationen...';
 
-            // Aktuelle Story-ID des Benutzers abrufen
             firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
                 const storyId = storyIdSnapshot.val();
-                if (storyId) {
-                    // Aktuelle Gruppe des Benutzers abrufen
-                    return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
-                        const groupId = groupIdSnapshot.val();
-                        if (groupId) {
-                            // Story-Daten aus der Gruppe abrufen
-                            return firebase.database().ref('groups/' + groupId + '/stories/' + storyId).once('value');
-                        } else {
-                            throw new Error('Keine Gruppe gefunden.');
-                        }
-                    });
-                } else {
-                    throw new Error('Keine Story-ID gefunden.');
-                }
-            }).then(storySnapshot => {
-                const storyData = storySnapshot.val();
-                if (storyData) {
-                    // Story-Informationen anzeigen
-                    storyInfoElement.innerHTML = `
-                        <strong>Story:</strong> ${storyData.text} <br>
-                    `;
-                } else {
-                    storyInfoElement.textContent = 'Keine Informationen zur Story gefunden.';
-                }
+                return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                    const groupId = groupIdSnapshot.val();
+                    if (groupId) {
+                        const storyRef = firebase.database().ref('groups/' + groupId + '/stories/' + storyId);
+                        return storyRef.once('value').then(storySnapshot => {
+                            const storyData = storySnapshot.val();
+                            if (storyData) {
+                                storyInfoElement.innerHTML = `<strong>Story:</strong> ${storyData.text} <br>`;
+                                
+                                // Versionsdaten überprüfen
+                                const versionsRef = storyRef.child('versions');
+                                return versionsRef.once('value').then(versionsSnapshot => {
+                                    versionsSnapshot.forEach(versionSnapshot => {
+                                        const versionData = versionSnapshot.val();
+                                        if (versionData.creator === userId) {
+                                            // Wenn der aktuelle Benutzer der Ersteller ist, fülle die Formulardaten
+                                            document.getElementById('versionText').value = versionData.text;
+                                            currentVersionRef = versionSnapshot.ref; // Verweis auf die existierende Version speichern
+                                            document.getElementById('deleteVersionButton').style.display = 'block'; // Löschen-Button anzeigen
+                                        }
+                                    });
+                                });
+                            } else {
+                                storyInfoElement.textContent = 'Keine Informationen zur Story gefunden.';
+                            }
+                        });
+                    } else {
+                        throw new Error('Keine Gruppe gefunden.');
+                    }
+                });
             }).catch(error => {
                 console.error("Fehler beim Laden der Story Informationen:", error);
                 storyInfoElement.textContent = 'Fehler beim Laden der Story Informationen.';
@@ -129,63 +150,79 @@
             e.preventDefault();
             const versionText = document.getElementById('versionText').value;
             const versionImage = document.getElementById('versionImage').files;
-
-            // Speichern der Version
             saveVersion(versionText, versionImage);
         });
 
         function saveVersion(text, images) {
             const userId = currentUser.uid;
+            if (currentVersionRef) {
+                // Vorhandene Version aktualisieren
+                const uploadPromises = [];
+                for (let i = 0; i < images.length; i++) {
+                    const imageFile = images[i];
+                    const storageRef = firebase.storage().ref('story_versions/' + currentVersionRef.key + '/' + imageFile.name);
+                    uploadPromises.push(storageRef.put(imageFile).then(snapshot => snapshot.ref.getDownloadURL()));
+                }
 
-            // Aktuelle Story-ID abrufen
-            firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
-                const storyId = storyIdSnapshot.val();
-                return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
-                    const groupId = groupIdSnapshot.val();
-                    if (groupId) {
-                        const storyRef = firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions');
-                        // Überprüfen, ob bereits eine Version existiert
-                        return storyRef.once('value').then(versionSnapshot => {
-                            if (versionSnapshot.exists()) {
-                                alert('Es existiert bereits eine Version für diese Story.');
-                                throw new Error('Es existiert bereits eine Version.');
-                            } else {
-                                const newVersionRef = storyRef.push(); // Eine neue Version unter "versions" erstellen
-
-                                // Speichern der Bild-URLs
-                                const uploadPromises = [];
-                                for (let i = 0; i < images.length; i++) {
-                                    const imageFile = images[i];
-                                    const storageRef = firebase.storage().ref('story_versions/' + newVersionRef.key + '/' + imageFile.name);
-                                    uploadPromises.push(storageRef.put(imageFile).then(snapshot => {
-                                        return snapshot.ref.getDownloadURL();
-                                    }));
-                                }
-
-                                return Promise.all(uploadPromises).then(imageURLs => {
-                                    // Version speichern
-                                    return newVersionRef.set({
-                                        text: text,
-                                        images: imageURLs,
-                                        createdAt: firebase.database.ServerValue.TIMESTAMP,
-                                        creator: userId
-                                    });
-                                });
-                            }
-                        });
-                    } else {
-                        throw new Error('Keine Gruppe gefunden.');
-                    }
+                Promise.all(uploadPromises).then(imageURLs => {
+                    return currentVersionRef.update({
+                        text: text,
+                        images: imageURLs,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }).then(() => {
+                    alert('Version erfolgreich aktualisiert!');
+                }).catch(error => {
+                    console.error("Fehler beim Aktualisieren der Version:", error);
+                    alert('Fehler beim Aktualisieren der Version.');
                 });
-            }).then(() => {
-                alert('Version erfolgreich gespeichert!');
-                document.getElementById('versionForm').reset(); // Formular zurücksetzen
-                window.location.href = 'index.html'; // Umleitung zur index.html
-            }).catch(error => {
-                console.error("Fehler beim Speichern der Version:", error);
-                alert('Fehler beim Speichern der Version.');
-            });
+            } else {
+                // Neue Version speichern
+                firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
+                    const storyId = storyIdSnapshot.val();
+                    return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                        const groupId = groupIdSnapshot.val();
+                        const storyRef = firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions');
+                        const newVersionRef = storyRef.push();
+
+                        const uploadPromises = [];
+                        for (let i = 0; i < images.length; i++) {
+                            const imageFile = images[i];
+                            const storageRef = firebase.storage().ref('story_versions/' + newVersionRef.key + '/' + imageFile.name);
+                            uploadPromises.push(storageRef.put(imageFile).then(snapshot => snapshot.ref.getDownloadURL()));
+                        }
+
+                        return Promise.all(uploadPromises).then(imageURLs => {
+                            return newVersionRef.set({
+                                text: text,
+                                images: imageURLs,
+                                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                                creator: userId
+                            });
+                        });
+                    });
+                }).then(() => {
+                    alert('Version erfolgreich gespeichert!');
+                    document.getElementById('versionForm').reset();
+                    window.location.href = 'index.html';
+                }).catch(error => {
+                    console.error("Fehler beim Speichern der Version:", error);
+                    alert('Fehler beim Speichern der Version.');
+                });
+            }
         }
+
+        document.getElementById('deleteVersionButton').addEventListener('click', function() {
+            if (currentVersionRef) {
+                currentVersionRef.remove().then(() => {
+                    alert('Version erfolgreich gelöscht!');
+                    window.location.reload();
+                }).catch(error => {
+                    console.error("Fehler beim Löschen der Version:", error);
+                    alert('Fehler beim Löschen der Version.');
+                });
+            }
+        });
     </script>
 </body>
 </html>
