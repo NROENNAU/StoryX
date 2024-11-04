@@ -108,16 +108,15 @@ function showAllStories() {
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
 
                     if (story.creatorId === userId) {
-                        const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Löschen';
-                        deleteButton.classList.add('delete-button');
-                        deleteButton.addEventListener('click', () => {
-                            const confirmation = confirm('Möchten Sie diese Story wirklich löschen?');
-                            if (confirmation) {
-                                deleteStory(groupId, childSnapshot.key);
-                            }
+                        const editButton = document.createElement('button');
+                        editButton.textContent = '✏️';
+                        editButton.classList.add('edit-button');
+                        editButton.addEventListener('click', () => {
+                            openEditPopup(storyItem.dataset.storyId, story.text);
                         });
-                        storyItem.appendChild(deleteButton);
+                        storyItem.appendChild(editButton);
+
+                        // Löschen-Button entfernt
                     }
 
                     storyItem.dataset.storyId = childSnapshot.key; // Speichern der Story-ID für die Suche
@@ -138,6 +137,76 @@ function showAllStories() {
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
 
+function openEditPopup(storyId, currentText) {
+    const popupContainer = document.createElement('div');
+    popupContainer.classList.add('popup-container');
+
+    const popupContent = document.createElement('div');
+    popupContent.classList.add('popup-content');
+
+    const title = document.createElement('h2');
+    title.innerText = "Story bearbeiten";
+    popupContent.appendChild(title);
+
+    const storyInput = document.createElement('textarea');
+    storyInput.value = currentText; // Aktuellen Text vorbefüllen
+    popupContent.appendChild(storyInput);
+
+    const saveButton = document.createElement('button');
+    saveButton.innerText = "Speichern";
+    saveButton.onclick = () => {
+        const newText = storyInput.value.trim();
+        if (newText.length === 0) {
+            alert("Die Story darf nicht leer sein.");
+            return;
+        } else if (newText.length > 50) {
+            alert("Die Story darf maximal 50 Zeichen lang sein.");
+            return;
+        }
+        updateStory(storyId, newText);
+        document.body.removeChild(popupContainer); // Schließt das Pop-up
+    };
+    popupContent.appendChild(saveButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.innerText = "Löschen";
+    deleteButton.onclick = () => {
+        const confirmation = confirm('Möchten Sie diese Story wirklich löschen?');
+        if (confirmation) {
+            const groupId = firebase.auth().currentUser.uid; // Anpassen je nach deinem Datenmodell
+            deleteStory(groupId, storyId);
+        }
+        document.body.removeChild(popupContainer); // Schließt das Pop-up
+    };
+    popupContent.appendChild(deleteButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.innerText = "Abbrechen";
+    cancelButton.onclick = () => {
+        document.body.removeChild(popupContainer); // Schließt das Pop-up
+    };
+    popupContent.appendChild(cancelButton);
+
+    popupContainer.appendChild(popupContent);
+    document.body.appendChild(popupContainer);
+}
+function updateStory(storyId, newText) {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+        if (groupId) {
+            const storyRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}`);
+            storyRef.update({ text: newText })
+                .then(() => {
+                    console.log("Story erfolgreich aktualisiert");
+                    showAllStories(); // Liste aktualisieren
+                })
+                .catch((error) => console.error("Fehler beim Aktualisieren der Story: ", error));
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
 // Funktion zur Filterung der Geschichten
 function filterStories() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
