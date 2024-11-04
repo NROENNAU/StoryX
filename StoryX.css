@@ -129,7 +129,7 @@ body, html {
 
 /* Story list container */
 .story-list-container {
-  max-height: 400px; /* Maximalhöhe für Scrollen */
+  height: 400px; /* Feste Höhe für den Container */
   overflow-y: auto; /* Aktivieren des Scrollens */
   border: 1px solid #ccc; /* Rahmen für den Container */
   padding: 10px; /* Innenabstand */
