@@ -405,12 +405,21 @@ h3 {
 .hidden {
     display: none;
 }
+/* Container-Stile */
 #searchContainer {
     margin: 20px;
+    width: calc(100% - 40px); /* 100% Breite minus Margin */
+    max-width: 600px; /* Maximalbreite für größere Bildschirme, kann angepasst werden */
 }
 
+/* Suchfeld-Stile */
 #searchInput {
-    width: 100%; /* Make the input field take the full width of its container */
-    padding: 10px; /* Add padding for better usability */
-    font-size: 16px; /* Adjust font size for readability */
+    width: 100%; /* Das Eingabefeld soll die volle Breite des Containers einnehmen */
+    padding: 10px; /* Polsterung für bessere Benutzerfreundlichkeit */
+    font-size: 16px; /* Schriftgröße für bessere Lesbarkeit */
+}
+
+/* Verhindern des Zoomens auf Mobilgeräten */
+input[type="text"] {
+    touch-action: manipulation; /* Verhindert das Zoomen beim Klicken */
 }
