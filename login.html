@@ -156,32 +156,44 @@
         }
 
         // Registrierungsfunktion
-        function register() {
-            const username = document.getElementById('registerUsername').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const registerMessage = document.getElementById('registerMessage');
+       function register() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const registerMessage = document.getElementById('registerMessage');
 
-            registerMessage.innerText = "Registrierung läuft...";
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Der Benutzer ist jetzt registriert und eingeloggt
-                    const user = userCredential.user;
-                    // Optional: Speichern des Benutzernamens in der Datenbank
-                    const userId = user.uid;
-                    firebase.database().ref(`users/${userId}`).set({
-                        username: username,
-                        email: email
-                    });
+    // Überprüfen, ob Felder leer sind
+    if (!username || !email || !password) {
+        registerMessage.innerText = "Bitte füllen Sie alle Felder aus.";
+        return;
+    }
 
-                    registerMessage.innerText = "Registrierung erfolgreich!";
-                    // Nach erfolgreicher Registrierung zur index.html umleiten
-                    window.location.href = "index.html"; // Deine Hauptseite
-                })
-                .catch((error) => {
-                    registerMessage.innerText = `Fehler: ${error.message}`;
+    registerMessage.innerText = "Registrierung läuft...";
+    
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+
+            // Benutzername im Authentication-Profil speichern
+            return user.updateProfile({
+                displayName: username
+            }).then(() => {
+                // Benutzername und E-Mail auch in der Realtime Database speichern, falls benötigt
+                return firebase.database().ref(`users/${user.uid}`).set({
+                    username: username,
+                    email: email
                 });
-        }
+            });
+        })
+        .then(() => {
+            registerMessage.innerText = "Registrierung erfolgreich!";
+            // Nach erfolgreicher Registrierung zur index.html umleiten
+            window.location.href = "index.html"; // Deine Hauptseite
+        })
+        .catch((error) => {
+            registerMessage.innerText = `Fehler: ${error.message}`;
+        });
+}
 
         // Funktion zum Umschalten zwischen Anmelden und Registrieren
         function toggleAuthMode() {
