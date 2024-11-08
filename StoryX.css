@@ -107,22 +107,29 @@ body, html {
   margin-bottom: 10px;
 }
 
-/* Button styles */
+/* Button-Container weiter nach unten verschieben */
 .button-container {
   display: flex;
   justify-content: center;
   gap: 25px;
-  margin: 20px 0;
+  margin-top: 40px; /* Erhöhe den Abstand nach oben, um die Buttons weiter nach unten zu verschieben */
 }
 
+/* Buttons kleiner machen */
 .button {
-  font-size: 20px;
-  padding: 15px 25px;
+  font-size: 16px; /* Kleinere Schriftgröße */
+  padding: 10px 20px; /* Kleinere Polsterung */
   background-color: rgba(255, 255, 255, 0.5);
   border: none;
   color: black;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* Schriftgröße der Buttons weiter reduzieren */
+.button-container .button {
+  font-size: 14px; /* Kleinere Schriftgröße für die Buttons */
+  padding: 8px 16px; /* Noch kleinere Polsterung */
 }
 
 /* Input fields and form styling */
