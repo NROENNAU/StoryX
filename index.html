@@ -73,27 +73,30 @@
     <div id="storyListContainer" class="story-list-container hidden"></div>
 
   <div id="randomStoryContainer" class="hidden" style="text-align: center;">
-    <div class="story-box large-container">
+    
+<p class="story-text" id="storyText">Hier erscheint die zufällige Story...</p>
+<div class="story-box large-container">
         <h1></h1>
-        <p class="story-text" id="storyText">Hier erscheint die zufällige Story...</p>
         <div class="button-container">
-            <button class="button" onclick="redirectToVersionsPage()">🎉<br>Unsere Details</button>
-         <button class="button" onclick="goToAddVersion()">🆕<br>Details einfügen</button>
+           
+        
         </div>
     </div>
 
     <div id="versionsContainer" class="container">
         <div id="versionsList" class="versions-list"></div>
-      <button class="button" onclick="goToRandomStory()">▶️ Next</button>
-        
-    </div>
+ <button class="button" onclick="redirectToVersionsPage()">🎉<br>Details</button>      
+ <button class="button" onclick="goToAddVersion()">🆕<br>Add Details</button>
+<button class="button" onclick="goToRandomStory()">▶️<br>Next</button>
+       </div>
 </div>
 
-           <!-- Create story im Body -->
+          <!-- Create story im Body -->
 <div id="addStoryContainer" class="hidden">
   <div class="story-box2">
-    <h2 class="story-title"></h2>
     <textarea id="storyInput" placeholder="Nenne ein paar Stichpunkte zu einer Story... die Details klären sich später" maxlength="50"></textarea>
+
+    <h2 class="story-title"></h2>
 
     <!-- Hidden Story Checkbox -->
     <label>
