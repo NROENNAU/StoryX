@@ -11,7 +11,7 @@ body, html {
 
 /* Hidden class to toggle visibility */
 .hidden {
-  display: none; /* Hides the element */
+  display: none !important; /* Verhindert Überschreibungen */
 }
 
 /* Header and footer styles */
@@ -232,21 +232,26 @@ h3 {
 }
 
 
+/* Hauptcontainer für Geschichten */
 #randomStoryContainer {
-  background-color: #ffffff; /* Weißer Hintergrund für den Container */
-  border-radius: 12px; /* Abgerundete Ecken */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Intensiverer Schatten für Tiefe */
-  padding: 20px; /* Innenabstand */
-  margin: 10px auto; /* Zentriert den Container horizontal */
-  max-width: 100%; /* Optional: maximale Breite, um den Container einzuschränken */
-  width: 95%; /* Responsive Breite */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Übergangseffekte */
-  box-sizing: border-box; /* Stellt sicher, dass Padding in der Breite enthalten ist */
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 95%;
+  height: calc(100vh - 200px);
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 #randomStoryContainer:hover {
-  transform: translateY(-5px); /* Leichtes Anheben bei Hover */
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); /* Schatten verstärken bei Hover */
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+
 }
 
 .story-box {
