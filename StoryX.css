@@ -151,7 +151,7 @@ label {
 
 /* Story list container */
 .story-list-container {
-  height: 450px; /* Feste Höhe für den Container */
+  height: 300px; /* Feste Höhe für den Container */
   overflow-y: auto; /* Aktivieren des Scrollens */
   border: 1px solid #ccc; /* Rahmen für den Container */
   padding: 10px; /* Innenabstand */
