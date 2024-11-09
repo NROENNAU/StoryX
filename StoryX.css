@@ -6,17 +6,16 @@ body, html {
   background-color: #2f2f2f;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Verhindert die Verteilung des Inhalts, hält den Footer unten */
 }
 
 /* Container für den Body-Inhalt */
 .main-content {
-  flex-grow: 1; /* Macht den Inhalt flexibel, um den verfügbaren Platz auszufüllen */
+  flex-grow: 1; /* Lässt den Body-Inhalt den verfügbaren Raum einnehmen */
   overflow: auto; /* Ermöglicht Scrollen, wenn der Inhalt größer als der verbleibende Platz ist */
 }
 
-/* Header und Footer fixieren */
-.header, .footer {
+/* Header fixieren */
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,9 +23,19 @@ body, html {
   background-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   color: black;
-  z-index: 1; /* Verhindert, dass sie hinter anderen Elementen verschwinden */
 }
 
+/* Footer fixieren und immer am unteren Rand halten */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: black;
+  margin-top: auto; /* Fügt einen automatischen Abstand hinzu, der den Footer an den unteren Rand schiebt */
+}
 /* Hidden class to toggle visibility */
 .hidden {
   display: none !important;
