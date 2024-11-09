@@ -1,7 +1,7 @@
 /* Allgemeine Seiteneinstellungen */
 body, html {
-  height: 100%; /* Sicherstellen, dass der body den gesamten Viewport einnimmt */
-  margin: 0; /* Kein Standardabstand */
+  height: 100%; /* Der Body soll immer die volle Höhe des Viewports einnehmen */
+  margin: 0; /* Entfernt den Standardabstand */
   font-family: Arial, sans-serif;
   background-color: #2f2f2f;
   display: flex;
@@ -10,8 +10,9 @@ body, html {
 
 /* Container für den Body-Inhalt */
 .main-content {
-  flex-grow: 1; /* Lässt den Body-Inhalt den verfügbaren Raum einnehmen */
-  overflow: auto; /* Ermöglicht Scrollen, wenn der Inhalt größer als der verbleibende Platz ist */
+  flex: 1; /* Lässt den Body-Inhalt den verbleibenden Platz einnehmen */
+  overflow: auto; /* Ermöglicht Scrollen bei großem Inhalt */
+  padding: 20px; /* Optional, für etwas Abstand im Inhalt */
 }
 
 /* Header fixieren */
@@ -25,7 +26,7 @@ body, html {
   color: black;
 }
 
-/* Footer fixieren und immer am unteren Rand halten */
+/* Footer immer am unteren Rand fixieren */
 .footer {
   display: flex;
   justify-content: space-between;
@@ -34,8 +35,9 @@ body, html {
   background-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   color: black;
-  margin-top: auto; /* Fügt einen automatischen Abstand hinzu, der den Footer an den unteren Rand schiebt */
+  margin-top: auto; /* Fügt den Footer automatisch an den unteren Rand */
 }
+
 /* Hidden class to toggle visibility */
 .hidden {
   display: none !important;
