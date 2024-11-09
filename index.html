@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
   <script src="StoryX.js" defer></script>
 </head>
 <body>
@@ -28,37 +29,6 @@
 
   <div id="mainContainer">
 
-    
-<div id="welcomePopup" class="popup hidden">
-    <div class="popup-content">
-        <h2>Willkommen bei StoryX!</h2>
-        <p>StoryX ist eine Plattform, auf der du Geschichten erstellen und teilen kannst. Schließe dich Gruppen an und erlebe neue Abenteuer!</p>
-        <button onclick="redirectToGroupsPage()">Jetzt Gruppe erstellen oder beitreten</button>
-    </div>
-</div>
-
-<!-- Group Management Section -->
-    <div id="groupListContainer" class="hidden">
-      <h2>Meine Gruppen</h2>
-      <ul id="groupsList"></ul> <!-- Hier wird die Gruppenliste angezeigt -->
-    </div>
-
-    <div id="groupContainer" class="hidden">
-      <div id="groupOptionsContainer">
-        <button onclick="showGroupCreationForm()">Neue Gruppe erstellen</button>
-        <input type="text" id="groupIdInput" placeholder="Gruppen-ID suchen">
-        <button onclick="searchGroupById()">Gruppe beitreten</button>
-      </div>
-    </div>
-
-    <div id="groupCreationContainer" class="hidden">
-      <h2>Gruppe erstellen</h2>
-      <input type="text" id="groupName" placeholder="Gruppenname">
-      <textarea id="groupDescription" placeholder="Beschreibung"></textarea>
-      <button onclick="createGroup()">Gruppe erstellen</button>
-      <button onclick="initializeBody()">Abbrechen</button>
-    </div>
-
     <div id="storyOverlay" class="overlay hidden">
       <div class="story-box">
         <div class="story-content" id="storyContent"></div>
@@ -70,10 +40,10 @@
 <div id="searchContainer" class="hidden">
     <input type="text" id="searchInput" placeholder="Story suchen...">
 </div>
-    <div id="storyListContainer" class="story-list-container hidden"></div>
-
+  
+<div id="storyListContainer" class="story-list-container hidden"></div>
   <div id="randomStoryContainer" class="hidden" style="text-align: center;">
-    
+      
 <p class="story-text" id="storyText">Hier erscheint die zufällige Story...</p>
 <div class="story-box large-container">
         <h1></h1>
@@ -111,13 +81,13 @@
     </div>
   </div>
 </div>
-
+</body>
     <div class="footer">
       <button class="button" onclick="showAllStories()">📋 Liste</button>
       <button class="button" onclick="goToRandomStory()">🔀 Zufallsmodus</button>
       <button class="button" onclick="goToAddStory()">🆕 Neue Story</button>
     </div>
-</body>
+
   </div>
 
   
