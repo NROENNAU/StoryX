@@ -133,7 +133,7 @@ label {
 
 /* Buttons kleiner machen */
 .button {
-  font-size: 20px; /* Kleinere Schriftgröße */
+  font-size: 16px; /* Kleinere Schriftgröße */
   padding: 10px 20px; /* Kleinere Polsterung */
   background-color: rgba(255, 255, 255, 0.5);
   border: none;
