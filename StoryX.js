@@ -62,17 +62,47 @@ function loadUserGroupAndStories() {
 
     userGroupRef.once('value').then((snapshot) => {
         const groupId = snapshot.val();
+
         if (groupId) {
+            // Wenn eine Gruppen-ID vorhanden ist, lade die Gruppeninformationen
             const groupRef = firebase.database().ref(`groups/${groupId}`);
             groupRef.once('value').then((groupSnapshot) => {
-                const groupName = groupSnapshot.val()?.name || "Keine Gruppe"; // Optional chaining verwenden
-                document.getElementById("currentGroupName").innerText = groupName;
-                goToRandomStory(); // Zufällige Geschichte anzeigen
+                const groupName = groupSnapshot.val()?.name;
+
+                if (groupName) {
+                    // Wenn ein Gruppenname existiert, zeige ihn an und lade die zufällige Geschichte
+                    document.getElementById("currentGroupName").innerText = groupName;
+                    goToRandomStory(); // Zufällige Geschichte anzeigen
+                } else {
+                    // Wenn kein Gruppenname gefunden wurde, zeige das Pop-up
+                    showGroupPopup();
+                }
             }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
         } else {
-            document.getElementById("currentGroupName").innerText = "🚀 Los gehts";
+            // Wenn keine Gruppen-ID vorhanden ist, zeige das Pop-up
+            showGroupPopup();
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Funktion zum Anzeigen des Pop-ups
+function showGroupPopup() {
+    const popup = document.createElement("div");
+    popup.className = "popup"; // CSS-Klasse für das Pop-up
+
+    popup.innerHTML = `
+        <div class="popup-content">
+            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
+            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+
+    // Event Listener für den Button
+    document.getElementById("startButton").addEventListener("click", () => {
+        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
+    });
 }
 
 // Funktion zum Ausblenden aller Container
