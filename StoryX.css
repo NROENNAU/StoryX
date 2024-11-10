@@ -51,48 +51,60 @@ body, html {
   align-items: center;
 }
 
-/* Aktualisiertes CSS für story-box mit Hintergrundbild */
 .story-box {
-  position: relative;
-  background-image: url('bild.jpeg');
-  background-size: cover;
-  background-position: center;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin: 10px auto;
-  max-width: 100%;
-  width: 95%;
-  height: 400px; /* 90% der Höhe des fullscreen-content-container */
-  box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: relative;
+    background-color: #fff; /* Weißer Hintergrund für die Story-Box */
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px auto;
+    max-width: 100%;
+    width: 95%;
+    height: 400px;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Verhindert, dass die Bilder außerhalb der Box erscheinen */
 }
 
+.collage-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Abstand zwischen den Bildern */
+    justify-content: center;
+}
+
+.collage-image {
+    width: 150px; /* Festlegen der Bildgröße */
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
 /* Pseudoelement für den weißen, transparenten Vordergrund */
 .story-box::before {
-  content: ''; /* Leeres Pseudoelement */
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.75); /* Weiß mit 50% Transparenz */
-  border-radius: 12px; /* Gleiche abgerundete Ecken */
-  z-index: 1; /* Vor dem Inhalt der Box aber hinter dem Text */
+    content: ''; /* Leeres Pseudoelement */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.75); /* Weiß mit 50% Transparenz */
+    border-radius: 12px; /* Gleiche abgerundete Ecken */
+    z-index: 1; /* Vor dem Inhalt der Box aber hinter dem Text */
 }
 
-/* Textinhalt in der story-box soll vor dem Pseudoelement erscheinen */
+
+/* Textinhalt in der story-box soll vor dem weißen Vordergrund erscheinen */
 .story-box > * {
-  position: relative;
-  z-index: 2; /* Text wird vor dem weißen Vordergrund angezeigt */
+    position: relative;
+    z-index: 2; /* Text wird vor dem weißen Vordergrund angezeigt */
 }
+
 .story-text {
-  font-size: 500%;
-  margin-bottom: 10px;
+    font-size: 500%;
+    margin-bottom: 10px;
 }
 
 /* Story-Box Container */
@@ -488,19 +500,19 @@ input[type="text"] {
     cursor: pointer;
     font-size: 1.2rem;
 }
-/* CSS für Collage */
-.collage-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 5px;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
+/* Container für die Collage */
+.image-collage-container {
+    display: flex;
+    gap: 10px; /* Abstand zwischen den Bildern */
+    margin-bottom: 20px; /* Abstand zum restlichen Inhalt */
+    justify-content: center; /* Zentriert die Bilder */
 }
 
-.collage-image {
-    width: 100%;
-    height: auto;
-    border-radius: 6px;
-    object-fit: cover;
+/* Jedes Bild in der Collage */
+.image-collage-container img {
+    width: 60px; /* Kleine Größe der Bilder */
+    height: 60px; /* Beibehalten des Verhältnisses */
+    object-fit: cover; /* Bilder gut zuschneiden */
+    border-radius: 6px; /* Optionale abgerundete Ecken */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: leichtes Schatten */
 }
