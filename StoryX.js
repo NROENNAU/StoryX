@@ -711,3 +711,133 @@ function updateVersionsButton() {
 window.onload = function() {
     updateVersionsButton();
 };
+
+// Funktion zum Abrufen der Bild-URLs direkt aus der Firebase Realtime Database
+async function fetchImageUrlsFromDatabase(groupId, storyId, versionIds) {
+    const imageUrls = [];
+
+    // Iteriere über alle Versionen und hole die Bild-URLs
+    for (const versionId of versionIds) {
+        const versionRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions/${versionId}/images`);
+        
+        try {
+            const imageSnapshot = await versionRef.once('value');
+            const images = imageSnapshot.val();
+            
+            // Debugging-Ausgabe
+            console.log(`Bilder für Version ${versionId}:`, images); 
+
+            if (images) {
+                Object.values(images).forEach(imageUrl => {
+                    imageUrls.push(imageUrl); // Alle Bild-URLs zur Liste hinzufügen
+                });
+            } else {
+                console.log(`Keine Bilder für Version ${versionId} gefunden.`); // Debugging-Ausgabe
+            }
+        } catch (error) {
+            console.error(`Fehler beim Abrufen der Bilder für Version ${versionId}:`, error);
+        }
+    }
+
+    console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
+    return imageUrls;
+}
+
+// Funktion zum Abrufen der Versionen-IDs aus der Firebase Realtime Database
+async function fetchVersionIds(groupId, storyId) {
+    const versionIds = [];
+    const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
+
+    try {
+        const versionsSnapshot = await versionsRef.once('value');
+        versionsSnapshot.forEach((childSnapshot) => {
+            versionIds.push(childSnapshot.key); // Version-IDs sammeln
+        });
+
+        console.log("Gefundene Versionen:", versionIds); // Debugging-Ausgabe
+    } catch (error) {
+        console.error("Fehler beim Abrufen der Versionen:", error);
+    }
+
+    return versionIds;
+}
+
+// Funktion, um die Collage zu erstellen
+function createCollage(imageUrls, container) {
+    clearCollage(container); // Leere den Container vor der Erstellung der Collage
+
+    const storyBox = container.querySelector('.story-box');
+    
+    if (imageUrls.length === 0) {
+        console.log("Keine Bilder gefunden, Standardbild anzeigen.");
+        storyBox.textContent = "Bislang keine Bilder zur Story vorhanden."; // Text anzeigen, wenn keine Bilder vorhanden sind
+        return; // Keine Bilder gefunden
+    }
+
+    const collageWrapper = document.createElement('div');
+    collageWrapper.classList.add('collage-wrapper');
+    container.appendChild(collageWrapper);
+
+    imageUrls.forEach((url) => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.classList.add('collage-image');
+        collageWrapper.appendChild(img); // Füge jedes Bild zur Collage hinzu
+    });
+}
+
+// Funktion zum Leeren der Collage
+function clearCollage(container) {
+    const collageWrapper = container.querySelector('.collage-wrapper');
+    if (collageWrapper) {
+        collageWrapper.remove(); // Entferne die bestehende Collage
+    }
+
+    // Stelle sicher, dass der Text "Keine Bilder" angezeigt wird, wenn keine Collage vorhanden ist
+    const storyBox = container.querySelector('.story-box');
+    if (storyBox) {
+        storyBox.textContent = "Bislang keine Bilder zur Story vorhanden."; // Standardtext anzeigen
+    }
+}
+
+// Funktion, um die Collage zu laden
+async function loadCollageForStory() {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+    const collageContainer = document.querySelector('.story-box'); // Container für die Collage
+
+    // Hole die Gruppen-ID des aktuellen Benutzers
+    const groupSnapshot = await userGroupRef.once('value');
+    const groupId = groupSnapshot.val();
+
+    console.log("Gruppen-ID:", groupId); // Debugging-Ausgabe
+
+    if (groupId) {
+        // Hole die Story-ID des aktuellen Benutzers
+        const currentStoryRef = firebase.database().ref(`users/${userId}/currentRandomStoryId`);
+        const storySnapshot = await currentStoryRef.once('value');
+        const storyId = storySnapshot.val();
+
+        console.log("Story-ID:", storyId); // Debugging-Ausgabe
+
+        if (storyId) {
+            // Hole die Versionen-IDs für die Story
+            const versionIds = await fetchVersionIds(groupId, storyId);
+
+            console.log("Versionen-IDs:", versionIds); // Debugging-Ausgabe
+
+            // Hole die Bild-URLs für jede Version
+            const imageUrls = await fetchImageUrlsFromDatabase(groupId, storyId, versionIds);
+
+            console.log("Bild-URLs:", imageUrls); // Debugging-Ausgabe
+
+            // Erstelle die Collage, wenn Bild-URLs gefunden wurden
+            createCollage(imageUrls, collageContainer);
+        }
+    }
+}
+
+// Funktion, die beim Laden der Seite aufgerufen wird, um die Collage zu laden
+window.onload = function() {
+    loadCollageForStory(); // Collage für die Story laden
+};
