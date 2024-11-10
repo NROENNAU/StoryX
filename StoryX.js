@@ -539,7 +539,7 @@ function goToRandomStory() {
                 const stories = [];
                 snapshot.forEach((childSnapshot) => {
                     const story = childSnapshot.val();
-                    stories.push({ id: childSnapshot.key, text: story.text }); // Die ID der Story speichern
+                    stories.push({ id: childSnapshot.key, text: story.text });
                 });
 
                 if (stories.length > 0) {
@@ -548,19 +548,20 @@ function goToRandomStory() {
                     do {
                         const randomIndex = Math.floor(Math.random() * stories.length);
                         randomStory = stories[randomIndex];
-                    } while (randomStory.id === currentRandomStoryId); // Überprüfen, ob die zufällige Story gleich der aktuellen ist
+                    } while (randomStory.id === currentRandomStoryId);
 
-                    currentRandomStoryId = randomStory.id; // Aktuelle Story-ID speichern
+                    currentRandomStoryId = randomStory.id;
 
-                    // Story-Text setzen
                     document.getElementById('storyText').textContent = randomStory.text;
 
-                    // Speichern der ID der aktuellen zufälligen Story in Firebase für den Benutzer
                     const userRandomStoryRef = firebase.database().ref(`users/${userId}/currentRandomStoryId`);
                     userRandomStoryRef.set(randomStory.id).then(() => {
-                        // Lade die Versionen der Story
-                        loadVersions(randomStory.id); // Stelle sicher, dass dies hier aufgerufen wird
+                        loadVersions(randomStory.id);
                     });
+
+                    // Aktualisiere die Anzahl der Versionen im "Details"-Button
+                    updateVersionsButton();
+
                 } else {
                     document.getElementById('storyText').textContent = "Keine Stories verfügbar.";
                 }
@@ -661,3 +662,52 @@ function adjustForKeyboard() {
 // Event Listener für das Resize-Ereignis
 window.addEventListener('resize', adjustForKeyboard);
 window.addEventListener('load', adjustForKeyboard); // Damit es beim ersten Laden auch angepasst wird
+
+function updateVersionsButton() {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+    const versionsButton = document.querySelector("button[onclick='redirectToVersionsPage()']");
+
+    if (!versionsButton) {
+        console.error("Versions-Button nicht gefunden.");
+        return;
+    }
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+        if (groupId) {
+            const currentStoryRef = firebase.database().ref(`users/${userId}/currentRandomStoryId`);
+
+            currentStoryRef.once('value').then((storySnapshot) => {
+                const storyId = storySnapshot.val();
+                if (storyId) {
+                    const versionsRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions`);
+
+                    versionsRef.once('value').then((versionsSnapshot) => {
+                        const versionCount = versionsSnapshot.exists() ? versionsSnapshot.numChildren() : 0;
+
+                        // Setze den Button-Text mit der Anzahl der Versionen
+                        versionsButton.innerHTML = `🎉<br>Details (${versionCount})`;
+                    }).catch((error) => {
+                        console.error("Fehler beim Abrufen der Versionsanzahl: ", error);
+                        versionsButton.innerHTML = `🎉<br>Details (0)`;
+                    });
+                } else {
+                    versionsButton.innerHTML = `🎉<br>Details (0)`;
+                }
+            }).catch((error) => {
+                console.error("Fehler beim Abrufen der aktuellen Story-ID: ", error);
+                versionsButton.innerHTML = `🎉<br>Details (0)`;
+            });
+        } else {
+            versionsButton.innerHTML = `🎉<br>Details (0)`;
+        }
+    }).catch((error) => {
+        console.error("Fehler beim Abrufen der Gruppeninformationen: ", error);
+        versionsButton.innerHTML = `🎉<br>Details (0)`;
+    });
+}
+
+window.onload = function() {
+    updateVersionsButton();
+};
