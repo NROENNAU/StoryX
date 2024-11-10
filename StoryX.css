@@ -105,6 +105,7 @@ body, html {
 .story-text {
     font-size: 500%;
     margin-bottom: 10px;
+    text-align: center; /* Zentriert den Text horizontal */
 }
 
 /* Story-Box Container */
@@ -259,6 +260,7 @@ height: 250px;
   justify-content: center;
   box-sizing: border-box;
   transition: transform 0.3s, box-shadow 0.3s;
+align-items: center;       /* Zentriert die Buttons vertikal
 }
 
 #randomStoryContainer:hover {
