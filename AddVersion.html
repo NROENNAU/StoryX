@@ -73,14 +73,13 @@
     <form id="versionForm">
         <textarea id="versionText" placeholder="Gib den Text für die neue Version ein..." required></textarea>
 
- <!-- Sprachnotiz -->
-    <div class="audio-container">
-      <label>Sprachnotiz aufnehmen:</label>
-      <button id="recordBtn" onclick="startRecording()">🎤 Aufnahme starten</button>
-      <button id="stopBtn" onclick="stopRecording()" disabled>🛑 Aufnahme stoppen</button>
-      <audio id="audioPlayback" controls></audio> <!-- Hier wird die Aufnahme wiedergegeben -->
-    </div>
-
+<!-- Start Recording Button außerhalb des Form-Elements -->
+<div class="audio-container">
+    <h2>Sprachnotiz aufnehmen:</h2>
+    <button id="recordBtn" type="button" onclick="startRecording()">🎤 Aufnahme starten</button>
+    <button id="stopBtn" type="button" onclick="stopRecording()" disabled>🛑 Aufnahme stoppen</button>
+    <audio id="audioPlayback" controls></audio> <!-- Hier wird die Aufnahme wiedergegeben -->
+</div>
         <input type="file" id="versionImage" accept="image/*" multiple>
         <button type="submit">Version speichern</button>
     </form>
@@ -233,30 +232,31 @@ const firebaseConfig = {
             }
         });
 
-// Funktion zum Aufnehmen einer Sprachnachricht
-    function startRecording() {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        chunks = [];
-        
-        mediaRecorder.ondataavailable = e => chunks.push(e.data);
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-          const audioURL = URL.createObjectURL(blob);
-          document.getElementById('audioPlayback').src = audioURL;
-        };
+function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            chunks = [];
 
-        document.getElementById('recordBtn').disabled = true;
-        document.getElementById('stopBtn').disabled = false;
-      });
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+                const audioURL = URL.createObjectURL(blob);
+                document.getElementById('audioPlayback').src = audioURL;
+            };
+
+            document.getElementById('recordBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+        }).catch(error => {
+            console.error("Fehler beim Zugriff auf das Mikrofon:", error);
+            alert("Mikrofonzugriff abgelehnt oder Fehler beim Zugriff. Bitte erlaube den Zugriff auf das Mikrofon.");
+        });
     }
 
-    // Funktion zum Stoppen der Aufnahme
     function stopRecording() {
-      mediaRecorder.stop();
-      document.getElementById('recordBtn').disabled = false;
-      document.getElementById('stopBtn').disabled = true;
+        mediaRecorder.stop();
+        document.getElementById('recordBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
     }
     </script>
 </body>
