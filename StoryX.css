@@ -51,25 +51,62 @@ body, html {
   align-items: center;
 }
 
+/* Hauptcontainer für Geschichten */
+#randomStoryContainer {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 95%;
+  height: 400px;
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: transform 0.3s, box-shadow 0.3s;
+align-items: center;}       /* Zentriert die Buttons vertikal
+
+
+#randomStoryContainer:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+}
+
 .story-box {
+  text-align: center; /* Zentrierte Texte */
+}
+
+.story-text {
+  font-size: 1.25em; /* Größere Schriftgröße für die Story */
+  color: #343a40; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+  margin: 2px 0; /* Abstand über und unter dem Text */
+  line-height: 0,1; /* Zeilenhöhe für besseren Lesefluss */
+}
+
+.button-container {
+  margin-top: auto; /* Abstand über dem Button-Container */
+}
+
+#storyBoxContainer {
     position: relative;
-    background-size: cover;
-    background-position: center;
-background-color: #f0f0f0; /* Hilfreich zur Diagnose */
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin: 10px auto;
-    max-width: 100%;
-    width: 95%;
-    height: 400px;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-repeat: no-repeat;
+  background-color: white;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 10px auto;
+  max-width: 100%;
+  width: 95%;
+  height: 400px; /* 90% der Höhe des fullscreen-content-container */
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .collage-container {
@@ -85,28 +122,9 @@ background-color: #f0f0f0; /* Hilfreich zur Diagnose */
     border-radius: 8px;
     object-fit: cover;
 }
-/* Pseudoelement für den weißen, transparenten Vordergrund */
-.story-box::before {
-    content: ''; /* Leeres Pseudoelement */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.75); /* Weiß mit 50% Transparenz */
-    border-radius: 12px; /* Gleiche abgerundete Ecken */
-    z-index: 1; /* Vor dem Inhalt der Box aber hinter dem Text */
-}
-
-
-/* Textinhalt in der story-box soll vor dem weißen Vordergrund erscheinen */
-.story-box > * {
-    position: relative;
-    z-index: 2; /* Text wird vor dem weißen Vordergrund angezeigt */
-}
 
 .story-text {
-    font-size: 500%;
+    font-size: 150%;
     margin-bottom: 10px;
     text-align: center; /* Zentriert den Text horizontal */
 }
@@ -249,43 +267,6 @@ height: 250px;
 }
 
 
-/* Hauptcontainer für Geschichten */
-#randomStoryContainer {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: 95%;
-  height: 400px;
-  margin: 10px auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-sizing: border-box;
-  transition: transform 0.3s, box-shadow 0.3s;
-align-items: center;       /* Zentriert die Buttons vertikal
-}
-
-#randomStoryContainer:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-}
-
-.story-box {
-  text-align: center; /* Zentrierte Texte */
-}
-
-.story-text {
-  font-size: 1.25em; /* Größere Schriftgröße für die Story */
-  color: #343a40; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
-  margin: 2px 0; /* Abstand über und unter dem Text */
-  line-height: 0,1; /* Zeilenhöhe für besseren Lesefluss */
-}
-
-.button-container {
-  margin-top: auto; /* Abstand über dem Button-Container */
-}
 
 .popup {
   position: fixed;
