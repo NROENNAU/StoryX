@@ -532,6 +532,8 @@ function goToRandomStory() {
     hideAllContainers();
     randomStoryContainer.classList.remove('hidden');
 
+	initializeStoryBox();
+
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
 
@@ -780,7 +782,7 @@ function loadCollageForStory(storyId) {
         if (imageUrls.length > 0) {
             // Das erste Bild als Hintergrund im randomStoryContainer setzen
             const firstImageUrl = imageUrls[0];
-            const randomStoryContainer = document.getElementById('storyBoxContainer');
+            const storyBoxContainer = document.getElementById('storyBoxContainer');
 
             if (storyBoxContainer) {
                 storyBoxContainer.style.backgroundImage = `url(${firstImageUrl})`;
@@ -850,3 +852,17 @@ async function fetchImageUrlsFromDatabase(groupId, storyId, versionIds) {
     console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
     return imageUrls;
 }
+
+function initializeStoryBox() {
+    const storyBoxContainer = document.getElementById('storyBoxContainer');
+    if (storyBoxContainer) {
+        storyBoxContainer.style.backgroundImage = 'url(default-image.jpg)'; // Standard-Hintergrundbild
+        storyBoxContainer.style.backgroundSize = 'cover';
+        storyBoxContainer.style.backgroundPosition = 'center';
+    }
+}
+
+window.onload = function() {
+    initializeStoryBox(); // Story-Box initialisieren
+    loadCollageForStory(someStoryId); // Deine Funktion aufrufen
+};
