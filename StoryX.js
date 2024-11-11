@@ -809,12 +809,25 @@ function loadCollageForStory(storyId) {
             });
         } else {
             console.log('Keine Bilder für diese Story gefunden.');
+            // Wenn keine Bilder gefunden werden, setze das Standardbild als Hintergrund
+            const storyBoxContainer = document.getElementById('storyBoxContainer');
+            if (storyBoxContainer) {
+                storyBoxContainer.style.backgroundImage = `url('Hintergrund_StoryX.jpg')`;
+                storyBoxContainer.style.backgroundSize = 'cover';
+                storyBoxContainer.style.backgroundPosition = 'center';
+            }
         }
     }).catch(error => {
         console.error("Fehler beim Laden der Bilder:", error);
+        // Im Fehlerfall auch das Standardbild setzen
+        const storyBoxContainer = document.getElementById('storyBoxContainer');
+        if (storyBoxContainer) {
+            storyBoxContainer.style.backgroundImage = `url('Hintergrund_StoryX.jpg')`;
+            storyBoxContainer.style.backgroundSize = 'cover';
+            storyBoxContainer.style.backgroundPosition = 'center';
+        }
     });
 }
-
 
 async function getImagesForStory(storyId) {
     const userId = firebase.auth().currentUser.uid; // Benutzer-ID für die Firebase-Datenbank
