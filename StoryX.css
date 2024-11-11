@@ -53,7 +53,9 @@ body, html {
 
 .story-box {
     position: relative;
-    background-color: #fff; /* Weißer Hintergrund für die Story-Box */
+    background-size: cover;
+    background-position: center;
+background-color: #f0f0f0; /* Hilfreich zur Diagnose */
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -62,11 +64,12 @@ body, html {
     width: 95%;
     height: 400px;
     box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Verhindert, dass die Bilder außerhalb der Box erscheinen */
+    background-repeat: no-repeat;
 }
 
 .collage-container {
@@ -276,12 +279,12 @@ align-items: center;       /* Zentriert die Buttons vertikal
 .story-text {
   font-size: 1.25em; /* Größere Schriftgröße für die Story */
   color: #343a40; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
-  margin: 15px 0; /* Abstand über und unter dem Text */
-  line-height: 1.6; /* Zeilenhöhe für besseren Lesefluss */
+  margin: 2px 0; /* Abstand über und unter dem Text */
+  line-height: 0,1; /* Zeilenhöhe für besseren Lesefluss */
 }
 
 .button-container {
-  margin-top: 25px; /* Abstand über dem Button-Container */
+  margin-top: auto; /* Abstand über dem Button-Container */
 }
 
 .popup {
@@ -517,4 +520,32 @@ input[type="text"] {
     object-fit: cover; /* Bilder gut zuschneiden */
     border-radius: 6px; /* Optionale abgerundete Ecken */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: leichtes Schatten */
+}
+
+.small-image {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.selected-image {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+background-color: #f0f0f0; /* Hilfreich zur Diagnose */
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px auto;
+    max-width: 100%;
+    width: 95%;
+    height: 400px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-repeat: no-repeat;
 }
