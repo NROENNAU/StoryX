@@ -56,10 +56,10 @@ body, html {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 5px;
   width: 95%;
   height: 400px;
-  margin: 10px auto;
+  margin: 2px auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -494,6 +494,7 @@ input[type="text"] {
     gap: 10px; /* Abstand zwischen den Bildern */
     margin-bottom: 20px; /* Abstand zum restlichen Inhalt */
     justify-content: center; /* Zentriert die Bilder */
+		overflow-x: auto; /* Ermöglicht horizontales Scrollen */
 }
 
 /* Jedes Bild in der Collage */
