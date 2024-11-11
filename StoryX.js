@@ -774,12 +774,18 @@ function loadCollageForStory(storyId) {
     showCollageContainer(); // Collage-Container anzeigen
 
     const collageContainer = document.getElementById('imageCollageContainer'); // Container für die Collage
+    const storyBox = document.getElementById('story-box'); // Story-Box als Hintergrundbild-Ziel
     collageContainer.innerHTML = ''; // Vorherige Collage entfernen
 
     // Lade die Bild-URLs von der Funktion
     getImagesForStory(storyId).then(imageUrls => {
         if (imageUrls.length > 0) {
-            // Bilder durchlaufen und in den Container einfügen
+            // Erstes Bild als Hintergrund der Story-Box setzen
+            storyBox.style.backgroundImage = `url(${imageUrls[0]})`;
+            storyBox.style.backgroundSize = 'cover'; // Optional: Größe anpassen
+            storyBox.style.backgroundPosition = 'center'; // Optional: Position anpassen
+            
+            // Die restlichen Bilder in den Container einfügen
             imageUrls.forEach(url => {
                 const img = document.createElement('img');
                 img.src = url; // URL als Quelle
