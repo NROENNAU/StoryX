@@ -780,7 +780,7 @@ function loadCollageForStory(storyId) {
     // Lade die Bild-URLs von der Funktion
     getImagesForStory(storyId).then(imageUrls => {
         if (imageUrls.length > 0) {
-            // Das erste Bild als Hintergrund im randomStoryContainer setzen
+            // Das erste Bild als Hintergrund im storyBoxContainer setzen
             const firstImageUrl = imageUrls[0];
             const storyBoxContainer = document.getElementById('storyBoxContainer');
 
@@ -795,6 +795,16 @@ function loadCollageForStory(storyId) {
                 const img = document.createElement('img');
                 img.src = url; // URL als Quelle
                 img.alt = 'Bild der Story'; // Alternativtext für das Bild
+
+                // Event Listener hinzufügen, damit das Bild in der StoryBox angezeigt wird
+                img.addEventListener('click', () => {
+                    if (storyBoxContainer) {
+                        storyBoxContainer.style.backgroundImage = `url(${url})`;
+                        storyBoxContainer.style.backgroundSize = 'cover';
+                        storyBoxContainer.style.backgroundPosition = 'center';
+                    }
+                });
+
                 collageContainer.appendChild(img); // Bild in den Container einfügen
             });
         } else {
@@ -804,6 +814,7 @@ function loadCollageForStory(storyId) {
         console.error("Fehler beim Laden der Bilder:", error);
     });
 }
+
 
 async function getImagesForStory(storyId) {
     const userId = firebase.auth().currentUser.uid; // Benutzer-ID für die Firebase-Datenbank
