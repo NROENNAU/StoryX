@@ -48,14 +48,15 @@
 
 
 <!-- Container für die Bilder-Collage -->
-<div id="imageCollageContainer" class="image-collage-container"></div>
+<div id="imageCollageContainer" class="image-collage-container hidden"></div>
 
 <!-- Hier kommt der randomStoryContainer -->
 <div class="random-story-container hidden" id="randomStoryContainer">
     <p class="story-text" id="storyText">Hier erscheint die zufällige Story...</p>
     <div class="story-box large-container">
-        <h1></h1>
+       
         <div class="button-container">
+<button class="button" onclick="goToRandomStory()">▶️<br>Next</button>
         </div>
     </div>
 
@@ -63,7 +64,7 @@
         <div id="versionsList" class="versions-list"></div>
  <button class="button" onclick="redirectToVersionsPage()">🎉<br>Details</button>
  <button class="button" onclick="goToAddVersion()">🆕<br>Add Details</button>
-<button class="button" onclick="goToRandomStory()">▶️<br>Next</button>
+
        </div>
 </div></div>
 
