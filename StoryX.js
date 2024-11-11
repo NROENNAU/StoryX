@@ -20,6 +20,7 @@ const storyListContainer = document.getElementById('storyListContainer');
 const addStoryContainer = document.getElementById('addStoryContainer');
 const randomStoryContainer = document.getElementById('randomStoryContainer');
 const storyInput = document.getElementById('storyInput');
+const imageCollageContainer = document.getElementById('imageCollageContainer')
 
 // Zeige den Benutzernamen, wenn der Benutzer angemeldet ist
 firebase.auth().onAuthStateChanged((user) => {
@@ -110,6 +111,8 @@ function hideAllContainers() {
     storyListContainer.classList.add('hidden');
     addStoryContainer.classList.add('hidden');
     randomStoryContainer.classList.add('hidden');
+imageCollageContainer.classList.add('hidden'); // Verstecke den Collage-Container
+
 }
 
 // Function to display all stories
@@ -366,6 +369,7 @@ function hideAllContainers() {
     storyListContainer.classList.add('hidden');
     addStoryContainer.classList.add('hidden');
     randomStoryContainer.classList.add('hidden');
+	imageCollageContainer.classList.add('hidden');
     document.getElementById('searchContainer').classList.add('hidden'); // Suchfunktion ausblenden
 }
 
@@ -760,7 +764,15 @@ async function fetchVersionIds(groupId, storyId) {
     return versionIds;
 }
 
+// Funktion zum Anzeigen des Collage-Containers
+function showCollageContainer() {
+    imageCollageContainer.classList.remove('hidden'); // Collage-Container anzeigen
+}
+
+// Funktion zum Laden der Collage für eine Story
 function loadCollageForStory(storyId) {
+    showCollageContainer(); // Collage-Container anzeigen
+
     const collageContainer = document.getElementById('imageCollageContainer'); // Container für die Collage
     collageContainer.innerHTML = ''; // Vorherige Collage entfernen
 
