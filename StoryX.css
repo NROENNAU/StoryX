@@ -111,9 +111,11 @@ align-items: center;}       /* Zentriert die Buttons vertikal
 
 .collage-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;  /* Keine Zeilenumbruch, alles in einer horizontalen Zeile */
     gap: 10px; /* Abstand zwischen den Bildern */
-    justify-content: center;
+    justify-content: flex-start; /* Bilder am Anfang ausrichten */
+    overflow-x: auto; /* Ermöglicht horizontales Scrollen */
+    padding-bottom: 10px; /* Optional, für etwas Abstand zum unteren Rand */
 }
 
 .collage-image {
