@@ -14,22 +14,27 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             color: #333;
         }
+
         .story-info {
             font-size: 18px;
             margin-top: 20px;
         }
+
         form {
             margin-top: 20px;
         }
+
         input, textarea {
             width: 100%;
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
         }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -38,9 +43,11 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         #deleteVersionButton {
             display: none;
             padding: 10px 20px;
@@ -51,11 +58,9 @@
             cursor: pointer;
             margin-top: 10px;
         }
+
         #deleteVersionButton:hover {
             background-color: darkred;
-        }
-        .audio-container {
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -68,41 +73,29 @@
     <form id="versionForm">
         <textarea id="versionText" placeholder="Gib den Text für die neue Version ein..." required></textarea>
 
-        <!-- Sprachnotiz und Transkription -->
-        <div class="audio-container">
-            <label>Sprachnotiz aufnehmen und transkribieren:</label>
-            <button id="recordBtn" onclick="startRecording()">🎤 Start</button>
-            <button id="stopBtn" onclick="stopRecording()" disabled>🛑 Stop</button>
-            <audio id="audioPlayback" controls></audio>
-            <div id="transcript" style="margin-top: 10px; font-size: 16px; color: #333;">Transkription: </div>
-        </div>
-
+ 
         <input type="file" id="versionImage" accept="image/*" multiple>
         <button type="submit">Version speichern</button>
     </form>
     <button id="deleteVersionButton">Version löschen</button>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
-            authDomain: "stories-c4b2e.firebaseapp.com",
-            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
-            projectId: "stories-c4b2e",
-            storageBucket: "stories-c4b2e.appspot.com",
-            messagingSenderId: "843705586806",
-            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
-            measurementId: "G-TGV27NXDRD"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+    authDomain: "stories-c4b2e.firebaseapp.com",
+    databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+    projectId: "stories-c4b2e",
+    storageBucket: "stories-c4b2e.appspot.com",
+    messagingSenderId: "843705586806",
+    appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+    measurementId: "G-TGV27NXDRD"
+};
 
         firebase.initializeApp(firebaseConfig);
 
         let currentUser;
         let currentVersionRef = null; // Verweis auf die vorhandene Version, falls vorhanden
-        let mediaRecorder;
-        let chunks = [];
-        let recognition;
 
-        // Firebase Auth & Daten laden
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
                 currentUser = user;
@@ -128,14 +121,16 @@
                             if (storyData) {
                                 storyInfoElement.innerHTML = `<strong>Story:</strong> ${storyData.text} <br>`;
                                 
+                                // Versionsdaten überprüfen
                                 const versionsRef = storyRef.child('versions');
                                 return versionsRef.once('value').then(versionsSnapshot => {
                                     versionsSnapshot.forEach(versionSnapshot => {
                                         const versionData = versionSnapshot.val();
                                         if (versionData.creator === userId) {
+                                            // Wenn der aktuelle Benutzer der Ersteller ist, fülle die Formulardaten
                                             document.getElementById('versionText').value = versionData.text;
-                                            currentVersionRef = versionSnapshot.ref;
-                                            document.getElementById('deleteVersionButton').style.display = 'block';
+                                            currentVersionRef = versionSnapshot.ref; // Verweis auf die existierende Version speichern
+                                            document.getElementById('deleteVersionButton').style.display = 'block'; // Löschen-Button anzeigen
                                         }
                                     });
                                 });
@@ -162,7 +157,61 @@
 
         function saveVersion(text, images) {
             const userId = currentUser.uid;
-            // Code für Firebase speichern...
+            if (currentVersionRef) {
+                // Vorhandene Version aktualisieren
+                const uploadPromises = [];
+                for (let i = 0; i < images.length; i++) {
+                    const imageFile = images[i];
+                    const storageRef = firebase.storage().ref('story_versions/' + currentVersionRef.key + '/' + imageFile.name);
+                    uploadPromises.push(storageRef.put(imageFile).then(snapshot => snapshot.ref.getDownloadURL()));
+                }
+
+                Promise.all(uploadPromises).then(imageURLs => {
+                    return currentVersionRef.update({
+                        text: text,
+                        images: imageURLs,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }).then(() => {
+                    alert('Version erfolgreich aktualisiert!');
+                }).catch(error => {
+                    console.error("Fehler beim Aktualisieren der Version:", error);
+                    alert('Fehler beim Aktualisieren der Version.');
+                });
+            } else {
+                // Neue Version speichern
+                firebase.database().ref('users/' + userId + '/currentRandomStoryId').once('value').then(storyIdSnapshot => {
+                    const storyId = storyIdSnapshot.val();
+                    return firebase.database().ref('users/' + userId + '/currentGroup').once('value').then(groupIdSnapshot => {
+                        const groupId = groupIdSnapshot.val();
+                        const storyRef = firebase.database().ref('groups/' + groupId + '/stories/' + storyId + '/versions');
+                        const newVersionRef = storyRef.push();
+
+                        const uploadPromises = [];
+                        for (let i = 0; i < images.length; i++) {
+                            const imageFile = images[i];
+                            const storageRef = firebase.storage().ref('story_versions/' + newVersionRef.key + '/' + imageFile.name);
+                            uploadPromises.push(storageRef.put(imageFile).then(snapshot => snapshot.ref.getDownloadURL()));
+                        }
+
+                        return Promise.all(uploadPromises).then(imageURLs => {
+                            return newVersionRef.set({
+                                text: text,
+                                images: imageURLs,
+                                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                                creator: userId
+                            });
+                        });
+                    });
+                }).then(() => {
+                    alert('Version erfolgreich gespeichert!');
+                    document.getElementById('versionForm').reset();
+                    window.location.href = 'index.html';
+                }).catch(error => {
+                    console.error("Fehler beim Speichern der Version:", error);
+                    alert('Fehler beim Speichern der Version.');
+                });
+            }
         }
 
         document.getElementById('deleteVersionButton').addEventListener('click', function() {
@@ -177,52 +226,31 @@
             }
         });
 
-        // Aufnahme & Transkription
-        function startRecording() {
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.start();
-                chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-                    const audioURL = URL.createObjectURL(blob);
-                    document.getElementById('audioPlayback').src = audioURL;
-                };
+// Funktion zum Aufnehmen einer Sprachnachricht
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        chunks = [];
+        
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+          const audioURL = URL.createObjectURL(blob);
+          document.getElementById('audioPlayback').src = audioURL;
+        };
 
-                startTranscription();
+        document.getElementById('recordBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+      });
+    }
 
-                document.getElementById('recordBtn').disabled = true;
-                document.getElementById('stopBtn').disabled = false;
-            });
-        }
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            stopTranscription();
-            document.getElementById('recordBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-        }
-
-        // Spracherkennung mit Web Speech API
-        function startTranscription() {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'de-DE';
-            recognition.interimResults = true;
-            recognition.onresult = event => {
-                const transcriptElement = document.getElementById('transcript');
-                transcriptElement.textContent = 'Transkription: ' + Array.from(event.results)
-                    .map(result => result[0].transcript)
-                    .join('');
-            };
-            recognition.start();
-        }
-
-        function stopTranscription() {
-            if (recognition) {
-                recognition.stop();
-            }
-        }
+    // Funktion zum Stoppen der Aufnahme
+    function stopRecording() {
+      mediaRecorder.stop();
+      document.getElementById('recordBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
     </script>
 </body>
 </html>
