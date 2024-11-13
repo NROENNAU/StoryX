@@ -884,6 +884,8 @@ function checkGroupMembership(groupId) {
             // Nutzer ist noch kein Mitglied der Gruppe
             confirmGroupJoin(groupId);
         }
+    }).catch(error => {
+        console.error("Fehler bei der Überprüfung der Gruppenmitgliedschaft: ", error);
     });
 }
 
@@ -979,7 +981,7 @@ function loadUserGroupAndStories() {
                     document.getElementById("currentGroupName").innerText = groupName;
                     goToRandomStory(); // Zufällige Geschichte anzeigen
                 } else {
-                    // Wenn kein Gruppenname gefunden wurde, zeige das Pop-up
+                    // Wenn kein Gruppenname gefunden wurde, keine weitere Aktion
                     console.log("Gruppenname nicht gefunden");
                 }
             }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
