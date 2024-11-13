@@ -35,65 +35,6 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
-let currentUser;
-  let groupIdFromURL = new URLSearchParams(window.location.search).get('groupId'); // Gruppe aus URL holen
-
-  // Prüfen, ob der Nutzer angemeldet ist
-  firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-          currentUser = user;
-          if (groupIdFromURL) {
-              showPopup(); // Pop-up anzeigen, wenn eine Gruppe in der URL vorhanden ist
-          }
-      } else {
-          alert("Bitte melden Sie sich an.");
-          window.location.href = "login.html"; // Umleitung zur Login-Seite, falls der Benutzer nicht angemeldet ist
-      }
-  });
-
-document.addEventListener("DOMContentLoaded", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const groupId = urlParams.get('groupId');
-
-    if (groupId) {
-        // Speichere die `groupId` für spätere Nutzung, z.B. in `sessionStorage`
-        sessionStorage.setItem('groupId', groupId);
-
-        // Rufe deine Funktion auf, um die Gruppe basierend auf `groupId` zu laden
-        loadGroupDetails(groupId);
-    } else {
-        // Optional: Standardaktion, wenn keine `groupId` vorhanden ist
-        console.log("Keine Gruppen-ID gefunden.");
-    }
-});
-
-function loadGroupDetails(groupId) {
-    // Logik hier, um die Details für die Gruppe mit `groupId` zu laden
-    console.log(`Lade Gruppen-Details für ID: ${groupId}`);
-    // Hier könntest du z.B. die Gruppeninformationen aus der Firebase-Datenbank laden.
-}
-  function showPopup() {
-      const popup = document.getElementById('popup');
-      popup.style.display = 'block'; // Pop-up sichtbar machen
-  }
-
-  function closePopup() {
-      const popup = document.getElementById('popup');
-      popup.style.display = 'none'; // Pop-up schließen
-  }
-
-  function joinGroup() {
-      if (groupIdFromURL) {
-          firebase.database().ref('groups/' + groupIdFromURL + '/members/' + currentUser.uid).set(true).then(() => {
-              alert("Erfolgreich der Gruppe beigetreten.");
-              closePopup(); // Pop-up schließen
-          }).catch((error) => {
-              alert("Fehler beim Beitreten der Gruppe: " + error.message);
-          });
-      }
-  }
-
-
 // Logout-Funktion
 function logout() {
     firebase.auth().signOut().then(() => {
