@@ -890,3 +890,62 @@ window.onload = function() {
     initializeStoryBox(); // Story-Box initialisieren
     loadCollageForStory(someStoryId); // Deine Funktion aufrufen
 };
+
+
+// Einladungslink verarbeiten
+document.addEventListener("DOMContentLoaded", function () {
+    const hash = window.location.hash;
+    const groupId = hash ? hash.split("=")[1] : null;
+
+    if (groupId) {
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                currentUser = user;
+                confirmGroupJoin(groupId);
+            } else {
+                window.location.href = "login.html#redirect=/#groupId=" + groupId;
+            }
+        });
+    }
+});
+
+function confirmGroupJoin(groupId) {
+    // Popup-Fenster zur Bestätigung des Gruppenbeitritts
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.padding = '20px';
+    popup.style.backgroundColor = '#fff';
+    popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    popup.style.zIndex = '1000';
+
+    const message = document.createElement('p');
+    message.textContent = "Möchten Sie der Gruppe „XY“ beitreten?";
+    popup.appendChild(message);
+
+    const joinButton = document.createElement('button');
+    joinButton.textContent = 'Beitreten';
+    joinButton.onclick = () => {
+        addUserToGroup(groupId);
+        document.body.removeChild(popup); // Schließe das Pop-up
+    };
+    popup.appendChild(joinButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Abbrechen';
+    cancelButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
+    popup.appendChild(cancelButton);
+
+    document.body.appendChild(popup); // Füge das Pop-up zum Dokument hinzu
+}
+
+function addUserToGroup(groupId) {
+    firebase.database().ref('groups/' + groupId + '/members/' + currentUser.uid).set(true).then(() => {
+        alert("Erfolgreich der Gruppe beigetreten.");
+        loadUserGroups(currentUser.uid); // Lade die Gruppen neu
+    }).catch((error) => {
+        alert("Fehler beim Beitreten der Gruppe: " + error.message);
+    });
+}
