@@ -857,14 +857,18 @@ window.onload = function() {
     // Bevorzugt den Query-Parameter, wenn vorhanden. Ansonsten den Hash-Teil.
     const groupId = groupIdFromQuery || groupIdFromHash;
 
+    console.log("Group ID aus URL:", groupId); // Debug: Zeigt die groupId aus der URL
+
     if (groupId) {
         // Wenn eine gültige groupId vorhanden ist, überprüfe die Mitgliedschaft
         firebase.auth().onAuthStateChanged(function (user) {
             if (user) {
                 currentUser = user;
+                console.log("Benutzer ist eingeloggt, prüfen der Gruppenmitgliedschaft...");
                 checkGroupMembership(groupId); // Prüfe, ob der Benutzer Mitglied der Gruppe ist
             } else {
                 // Falls der Benutzer nicht eingeloggt ist, leite zur Login-Seite
+                console.log("Benutzer nicht eingeloggt, Weiterleitung zur Login-Seite.");
                 window.location.href = `login.html?groupId=${groupId}`;
             }
         });
@@ -877,11 +881,15 @@ window.onload = function() {
 function checkGroupMembership(groupId) {
     const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
     userGroupRef.once('value').then(snapshot => {
+        console.log("Daten für Gruppenmitgliedschaft:", snapshot.val()); // Debug: Zeigt, ob der Benutzer in der Gruppe ist
+
         if (snapshot.exists()) {
             // Nutzer ist bereits Mitglied der Gruppe
+            console.log("Benutzer ist bereits Mitglied der Gruppe.");
             confirmGroupSwitch(groupId);
         } else {
             // Nutzer ist noch kein Mitglied der Gruppe
+            console.log("Benutzer ist noch kein Mitglied der Gruppe.");
             confirmGroupJoin(groupId);
         }
     }).catch(error => {
@@ -891,6 +899,7 @@ function checkGroupMembership(groupId) {
 
 // Funktion zum Bestätigen des Gruppenwechsels
 function confirmGroupSwitch(groupId) {
+    console.log("Pop-up zur Bestätigung des Gruppenwechsels wird angezeigt.");
     const popup = createPopup("Möchten Sie in die Gruppe wechseln?", () => {
         updateCurrentGroup(groupId);
         alert("Sie haben erfolgreich in die Gruppe gewechselt.");
@@ -900,6 +909,7 @@ function confirmGroupSwitch(groupId) {
 
 // Funktion zum Bestätigen des Beitritts zur Gruppe
 function confirmGroupJoin(groupId) {
+    console.log("Pop-up zur Bestätigung des Gruppenbeitritts wird angezeigt.");
     const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
         addUserToGroup(groupId);
     });
@@ -981,7 +991,6 @@ function loadUserGroupAndStories() {
                     document.getElementById("currentGroupName").innerText = groupName;
                     goToRandomStory(); // Zufällige Geschichte anzeigen
                 } else {
-                    // Wenn kein Gruppenname gefunden wurde, keine weitere Aktion
                     console.log("Gruppenname nicht gefunden");
                 }
             }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
