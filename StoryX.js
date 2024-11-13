@@ -986,21 +986,3 @@ function updateCurrentGroup(groupId) {
         alert("Fehler beim Wechseln der Gruppe: " + error.message);
     });
 }
-
-function showGroupPopup() {
-    const popup = document.createElement("div");
-    popup.className = "popup";
-
-    popup.innerHTML = `
-        <div class="popup-content">
-            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
-            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
-        </div>
-    `;
-    
-    document.body.appendChild(popup);
-
-    document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = "otherGroups.html";
-    });
-}
