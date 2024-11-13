@@ -902,7 +902,7 @@ document.addEventListener("DOMContentLoaded", function () {
         firebase.auth().onAuthStateChanged(function (user) {
             if (user) {
                 currentUser = user;
-                confirmGroupJoin(groupId);
+                checkGroupMembership(groupId); // Prüfe Mitgliedschaft
             } else {
                 // Falls nicht angemeldet, zur Login-Seite umleiten und groupId beibehalten
                 window.location.href = `login.html#groupId=${groupId}`;
@@ -910,25 +910,36 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-document.addEventListener("DOMContentLoaded", function () {
-    const hashParams = new URLSearchParams(window.location.hash.slice(1)); // Entfernt das '#' und liest die Parameter
-    const groupId = hashParams.get('groupId'); // Gruppen-ID vom Hash-Parameter
 
-    if (groupId) {
-        firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                currentUser = user;
-                confirmGroupJoin(groupId);
-            } else {
-                // Falls nicht angemeldet, zur Login-Seite umleiten und Hash-Parameter beibehalten
-                window.location.href = "login.html#groupId=" + groupId;
-            }
-        });
-    }
-});
+function checkGroupMembership(groupId) {
+    const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
+    userGroupRef.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+            // Nutzer ist bereits Mitglied der Gruppe
+            confirmGroupSwitch(groupId);
+        } else {
+            // Nutzer ist noch kein Mitglied der Gruppe
+            confirmGroupJoin(groupId);
+        }
+    });
+}
+
+function confirmGroupSwitch(groupId) {
+    const popup = createPopup("Möchten Sie in die Gruppe wechseln?", () => {
+        updateCurrentGroup(groupId);
+        alert("Sie haben erfolgreich in die Gruppe gewechselt.");
+    });
+    document.body.appendChild(popup);
+}
 
 function confirmGroupJoin(groupId) {
-    // Popup-Fenster zur Bestätigung des Gruppenbeitritts
+    const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
+        addUserToGroup(groupId);
+    });
+    document.body.appendChild(popup);
+}
+
+function createPopup(messageText, onConfirm) {
     const popup = document.createElement('div');
     popup.style.position = 'fixed';
     popup.style.left = '50%';
@@ -940,30 +951,43 @@ function confirmGroupJoin(groupId) {
     popup.style.zIndex = '1000';
 
     const message = document.createElement('p');
-    message.textContent = "Möchten Sie der Gruppe „XY“ beitreten?";
+    message.textContent = messageText;
     popup.appendChild(message);
 
-    const joinButton = document.createElement('button');
-    joinButton.textContent = 'Beitreten';
-    joinButton.onclick = () => {
-        addUserToGroup(groupId);
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'Ja';
+    confirmButton.onclick = () => {
+        onConfirm();
         document.body.removeChild(popup); // Schließe das Pop-up
     };
-    popup.appendChild(joinButton);
+    popup.appendChild(confirmButton);
 
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Abbrechen';
+    cancelButton.textContent = 'Nein';
     cancelButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
     popup.appendChild(cancelButton);
 
-    document.body.appendChild(popup); // Füge das Pop-up zum Dokument hinzu
+    return popup;
 }
 
 function addUserToGroup(groupId) {
-    firebase.database().ref('groups/' + groupId + '/members/' + currentUser.uid).set(true).then(() => {
-        alert("Erfolgreich der Gruppe beigetreten.");
-        loadUserGroups(currentUser.uid); // Lade die Gruppen neu
-    }).catch((error) => {
+    firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`).set(true)
+    .then(() => {
+        alert("Sie sind der Gruppe erfolgreich beigetreten.");
+        updateCurrentGroup(groupId);
+    })
+    .catch((error) => {
         alert("Fehler beim Beitreten der Gruppe: " + error.message);
+    });
+}
+
+function updateCurrentGroup(groupId) {
+    firebase.database().ref(`users/${currentUser.uid}/currentGroup`).set(groupId)
+    .then(() => {
+        // Lade die Gruppen oder aktualisiere die UI entsprechend
+        loadUserGroups(currentUser.uid);
+    })
+    .catch(error => {
+        alert("Fehler beim Wechseln der Gruppe: " + error.message);
     });
 }
