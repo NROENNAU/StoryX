@@ -35,6 +35,44 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+let currentUser;
+  let groupIdFromURL = new URLSearchParams(window.location.search).get('groupId'); // Gruppe aus URL holen
+
+  // Prüfen, ob der Nutzer angemeldet ist
+  firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+          currentUser = user;
+          if (groupIdFromURL) {
+              showPopup(); // Pop-up anzeigen, wenn eine Gruppe in der URL vorhanden ist
+          }
+      } else {
+          alert("Bitte melden Sie sich an.");
+          window.location.href = "login.html"; // Umleitung zur Login-Seite, falls der Benutzer nicht angemeldet ist
+      }
+  });
+
+  function showPopup() {
+      const popup = document.getElementById('popup');
+      popup.style.display = 'block'; // Pop-up sichtbar machen
+  }
+
+  function closePopup() {
+      const popup = document.getElementById('popup');
+      popup.style.display = 'none'; // Pop-up schließen
+  }
+
+  function joinGroup() {
+      if (groupIdFromURL) {
+          firebase.database().ref('groups/' + groupIdFromURL + '/members/' + currentUser.uid).set(true).then(() => {
+              alert("Erfolgreich der Gruppe beigetreten.");
+              closePopup(); // Pop-up schließen
+          }).catch((error) => {
+              alert("Fehler beim Beitreten der Gruppe: " + error.message);
+          });
+      }
+  }
+
+
 // Logout-Funktion
 function logout() {
     firebase.auth().signOut().then(() => {
