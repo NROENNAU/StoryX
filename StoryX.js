@@ -874,26 +874,33 @@ window.onload = function() {
     }
 };
 
-// Funktion zur Gruppenmitgliedschaft überprüfen
+// Prüfe, ob der Benutzer Mitglied der Gruppe ist und zeige Pop-up
 function checkGroupMembership(groupId) {
     const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
     userGroupRef.once('value').then(snapshot => {
         if (snapshot.exists()) {
             // Nutzer ist bereits Mitglied der Gruppe
-            loadUserGroupAndStories(groupId);  // Lade die Gruppeninformationen und Geschichten
+            confirmGroupSwitch(groupId);
         } else {
             // Nutzer ist noch kein Mitglied der Gruppe
-            showGroupJoinPopup(groupId);  // Zeige das Pop-up, um dem Beitritt zuzustimmen
+            confirmGroupJoin(groupId);
         }
-    }).catch((error) => {
-        console.error("Fehler beim Überprüfen der Mitgliedschaft: ", error);
     });
 }
 
+// Funktion zum Bestätigen des Gruppenwechsels
+function confirmGroupSwitch(groupId) {
+    const popup = createPopup("Möchten Sie in die Gruppe wechseln?", () => {
+        updateCurrentGroup(groupId);
+        alert("Sie haben erfolgreich in die Gruppe gewechselt.");
+    });
+    document.body.appendChild(popup);
+}
+
 // Funktion zum Bestätigen des Beitritts zur Gruppe
-function showGroupJoinPopup(groupId) {
+function confirmGroupJoin(groupId) {
     const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
-        addUserToGroup(groupId);  // Füge den Benutzer zur Gruppe hinzu
+        addUserToGroup(groupId);
     });
     document.body.appendChild(popup);
 }
@@ -947,7 +954,7 @@ function updateCurrentGroup(groupId) {
     firebase.database().ref(`users/${currentUser.uid}/currentGroup`).set(groupId)
     .then(() => {
         // Lade die Gruppen oder aktualisiere die UI entsprechend
-        loadUserGroupAndStories(groupId);  // Lädt die Gruppeninformationen und Geschichten
+        loadUserGroupAndStories(); // Lädt die Gruppeninformationen und Geschichten
     })
     .catch(error => {
         alert("Fehler beim Wechseln der Gruppe: " + error.message);
@@ -955,7 +962,7 @@ function updateCurrentGroup(groupId) {
 }
 
 // Lade die Gruppeninformationen und Geschichten des Benutzers
-function loadUserGroupAndStories(groupId) {
+function loadUserGroupAndStories() {
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
 
