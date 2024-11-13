@@ -869,8 +869,7 @@ window.onload = function() {
             }
         });
     } else {
-        // Wenn keine groupId vorhanden ist, zeige das allgemeine Pop-up für neue Benutzer
-        showGroupPopup();
+        console.log("Keine groupId gefunden, keine Aktion erforderlich.");
     }
 };
 
@@ -981,32 +980,11 @@ function loadUserGroupAndStories() {
                     goToRandomStory(); // Zufällige Geschichte anzeigen
                 } else {
                     // Wenn kein Gruppenname gefunden wurde, zeige das Pop-up
-                    showGroupPopup();
+                    console.log("Gruppenname nicht gefunden");
                 }
             }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
         } else {
-            // Wenn keine Gruppen-ID vorhanden ist, zeige das Pop-up
-            showGroupPopup();
+            console.log("Keine Gruppen-ID im Benutzerprofil gefunden");
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
-
-// Funktion zum Anzeigen des Pop-ups, wenn keine groupId vorhanden ist
-function showGroupPopup() {
-    const popup = document.createElement("div");
-    popup.className = "popup"; // CSS-Klasse für das Pop-up
-
-    popup.innerHTML = `
-        <div class="popup-content">
-            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
-            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
-        </div>
-    `;
-    
-    document.body.appendChild(popup);
-
-    // Event Listener für den Button
-    document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
-    });
 }
