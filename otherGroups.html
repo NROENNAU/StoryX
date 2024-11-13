@@ -425,7 +425,16 @@ function generateInviteLink() {
         const currentGroupId = snapshot.val(); // Aktuelle Gruppen-ID abrufen
 
         if (currentGroupId) {
-            const inviteLink = `${window.location.origin}${window.location.pathname}?groupId=${currentGroupId}`;
+            const inviteLink = `${window.location.origin}/index.html?groupId=${currentGroupId}`;
+            console.log(`Einladungslink: ${inviteLink}`);
+            // Hier kannst du den Link kopieren, teilen oder anzeigen
+        } else {
+            console.log("Keine aktuelle Gruppe gefunden.");
+        }
+    }).catch(error => {
+        console.error("Fehler beim Abrufen der Gruppen-ID:", error);
+    });
+}
 
             // Erstellen des Popups zum Anzeigen und Kopieren des Einladungslinks
             const popup = document.createElement('div');
