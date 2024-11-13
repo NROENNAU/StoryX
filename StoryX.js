@@ -883,15 +883,12 @@ window.onload = function() {
 // Einladungslink verarbeiten
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Überprüfe, ob die URL einen 'groupId' im Query-String oder Fragment enthält
-    const urlParams = new URLSearchParams(window.location.search);  // Sucht in den Query-Parametern
-    const groupIdFromQuery = urlParams.get('groupId'); // Extrahiert den groupId-Parameter aus der Query
+    // Überprüfe den Query-String und den Hash
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupIdFromQuery = urlParams.get('groupId');
+    const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('groupId') : null;
 
-    // Falls im Query-String kein groupId gefunden wird, prüfe den Fragment-Teil
-    const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
-
-    // Bevorzugt den Query-String, falls vorhanden. Ansonsten den Fragment-Teil.
-    const groupId = groupIdFromQuery || groupIdFromHash;
+    const groupId = groupIdFromQuery || groupIdFromHash;  // Priorisiere den Query-Parameter
 
     if (groupId) {
         // Wenn eine groupId vorhanden ist, prüfe die Gruppenmitgliedschaft
@@ -983,7 +980,6 @@ function addUserToGroup(groupId) {
 function updateCurrentGroup(groupId) {
     firebase.database().ref(`users/${currentUser.uid}/currentGroup`).set(groupId)
     .then(() => {
-        // Lade die Gruppen oder aktualisiere die UI entsprechend
         loadUserGroups(currentUser.uid);
     })
     .catch(error => {
@@ -991,10 +987,9 @@ function updateCurrentGroup(groupId) {
     });
 }
 
-// Funktion zum Anzeigen des Pop-ups, wenn keine groupId vorhanden ist
 function showGroupPopup() {
     const popup = document.createElement("div");
-    popup.className = "popup"; // CSS-Klasse für das Pop-up
+    popup.className = "popup";
 
     popup.innerHTML = `
         <div class="popup-content">
@@ -1005,8 +1000,7 @@ function showGroupPopup() {
     
     document.body.appendChild(popup);
 
-    // Event Listener für den Button
     document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
+        window.location.href = "otherGroups.html";
     });
 }
