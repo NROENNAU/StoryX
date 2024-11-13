@@ -847,15 +847,14 @@ window.onload = function() {
     loadCollageForStory(someStoryId); // Deine Funktion aufrufen
 };
 
-// Überprüfe, ob die URL einen 'groupId' im Hash oder Query-String enthält
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);  // Query-Parameter
     const groupIdFromQuery = urlParams.get('groupId'); // Auslesen der groupId aus der Query
 
-    // Prüfe den Hash-Teil der URL
+    // Prüfe den Hash-Teil der URL (alles nach dem #)
     const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
 
-    // Bevorzugt den Query-Parameter, wenn vorhanden. Ansonsten den Hash-Teil
+    // Bevorzugt den Query-Parameter, wenn vorhanden. Ansonsten den Hash-Teil.
     const groupId = groupIdFromQuery || groupIdFromHash;
 
     if (groupId) {
