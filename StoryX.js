@@ -860,60 +860,86 @@ window.onload = function() {
     console.log("Group ID aus URL:", groupId); // Debug: Zeigt die groupId aus der URL
 
     if (groupId) {
-        // Wenn eine gültige groupId vorhanden ist, überprüfe die Mitgliedschaft
-        firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                currentUser = user;
-                console.log("Benutzer ist eingeloggt, prüfen der Gruppenmitgliedschaft...");
-                checkGroupMembership(groupId); // Prüfe, ob der Benutzer Mitglied der Gruppe ist
-            } else {
-                // Falls der Benutzer nicht eingeloggt ist, leite zur Login-Seite
-                console.log("Benutzer nicht eingeloggt, Weiterleitung zur Login-Seite.");
-                window.location.href = `login.html?groupId=${groupId}`;
-            }
-        });
+        // Wenn eine gültige groupId vorhanden ist, zeige sofort das Pop-up zur Gruppenmitgliedschaft
+        showGroupPopup(groupId);
     } else {
         console.log("Keine groupId gefunden, keine Aktion erforderlich.");
     }
 };
 
-// Prüfe, ob der Benutzer Mitglied der Gruppe ist und zeige Pop-up
-function checkGroupMembership(groupId) {
-    const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
-    userGroupRef.once('value').then(snapshot => {
-        console.log("Daten für Gruppenmitgliedschaft:", snapshot.val()); // Debug: Zeigt, ob der Benutzer in der Gruppe ist
+// Funktion zum Anzeigen des Pop-ups zur Bestätigung des Gruppenbeitritts
+function showGroupPopup(groupId) {
+    console.log("Pop-up zur Gruppenmitgliedschaft wird angezeigt.");
+    
+    const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
+        // Wenn der Benutzer auf "Beitreten" klickt, prüfen wir, ob er Mitglied ist
+        checkGroupMembership(groupId);
+    });
+    document.body.appendChild(popup);
+}
 
+// Funktion zum Bestätigen des Gruppenbeitritts
+function checkGroupMembership(groupId) {
+    console.log("Prüfung der Gruppenmitgliedschaft...");
+
+    const userId = firebase.auth().currentUser?.uid;
+    if (!userId) {
+        alert("Bitte melden Sie sich an, um der Gruppe beizutreten.");
+        return;
+    }
+
+    const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${userId}`);
+    userGroupRef.once('value').then(snapshot => {
         if (snapshot.exists()) {
-            // Nutzer ist bereits Mitglied der Gruppe
-            console.log("Benutzer ist bereits Mitglied der Gruppe.");
-            confirmGroupSwitch(groupId);
+            // Der Benutzer ist bereits Mitglied der Gruppe
+            alert("Sie sind bereits Mitglied dieser Gruppe.");
         } else {
-            // Nutzer ist noch kein Mitglied der Gruppe
-            console.log("Benutzer ist noch kein Mitglied der Gruppe.");
-            confirmGroupJoin(groupId);
+            // Der Benutzer ist noch kein Mitglied, füge ihn hinzu
+            addUserToGroup(groupId);
         }
     }).catch(error => {
         console.error("Fehler bei der Überprüfung der Gruppenmitgliedschaft: ", error);
     });
 }
 
-// Funktion zum Bestätigen des Gruppenwechsels
-function confirmGroupSwitch(groupId) {
-    console.log("Pop-up zur Bestätigung des Gruppenwechsels wird angezeigt.");
-    const popup = createPopup("Möchten Sie in die Gruppe wechseln?", () => {
-        updateCurrentGroup(groupId);
-        alert("Sie haben erfolgreich in die Gruppe gewechselt.");
+// Funktion zum Hinzufügen des Benutzers zur Gruppe
+function addUserToGroup(groupId) {
+    console.log("Füge den Benutzer der Gruppe hinzu...");
+
+    const userId = firebase.auth().currentUser?.uid;
+    if (!userId) {
+        alert("Benutzer ist nicht eingeloggt.");
+        return;
+    }
+
+    firebase.database().ref(`groups/${groupId}/members/${userId}`).set(true)
+    .then(() => {
+        alert("Sie sind erfolgreich der Gruppe beigetreten.");
+        updateCurrentGroup(groupId); // Aktualisiere die Gruppe des Benutzers
+    })
+    .catch((error) => {
+        alert("Fehler beim Beitreten der Gruppe: " + error.message);
     });
-    document.body.appendChild(popup);
 }
 
-// Funktion zum Bestätigen des Beitritts zur Gruppe
-function confirmGroupJoin(groupId) {
-    console.log("Pop-up zur Bestätigung des Gruppenbeitritts wird angezeigt.");
-    const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
-        addUserToGroup(groupId);
+// Funktion zum Aktualisieren der aktuellen Gruppe des Benutzers
+function updateCurrentGroup(groupId) {
+    console.log("Aktualisiere die aktuelle Gruppe des Benutzers...");
+
+    const userId = firebase.auth().currentUser?.uid;
+    if (!userId) {
+        alert("Benutzer ist nicht eingeloggt.");
+        return;
+    }
+
+    firebase.database().ref(`users/${userId}/currentGroup`).set(groupId)
+    .then(() => {
+        console.log("Aktuelle Gruppe erfolgreich aktualisiert.");
+        // Nach dem Hinzufügen zur Gruppe könnte man auch auf eine neue Seite umleiten oder die UI entsprechend anpassen
+    })
+    .catch(error => {
+        alert("Fehler beim Wechseln der Gruppe: " + error.message);
     });
-    document.body.appendChild(popup);
 }
 
 // Funktion zur Pop-up-Erstellung
@@ -935,67 +961,15 @@ function createPopup(messageText, onConfirm) {
     const confirmButton = document.createElement('button');
     confirmButton.textContent = 'Ja';
     confirmButton.onclick = () => {
-        onConfirm();
-        document.body.removeChild(popup); // Schließe das Pop-up
+        onConfirm(); // Bestätigung, dass der Benutzer der Gruppe beitreten möchte
+        document.body.removeChild(popup); // Schließt das Pop-up
     };
     popup.appendChild(confirmButton);
 
     const cancelButton = document.createElement('button');
     cancelButton.textContent = 'Nein';
-    cancelButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
+    cancelButton.onclick = () => document.body.removeChild(popup); // Schließt das Pop-up
     popup.appendChild(cancelButton);
 
     return popup;
-}
-
-// Funktion zum Hinzufügen des Benutzers zur Gruppe
-function addUserToGroup(groupId) {
-    firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`).set(true)
-    .then(() => {
-        alert("Sie sind der Gruppe erfolgreich beigetreten.");
-        updateCurrentGroup(groupId);
-    })
-    .catch((error) => {
-        alert("Fehler beim Beitreten der Gruppe: " + error.message);
-    });
-}
-
-// Funktion zum Aktualisieren der aktuellen Gruppe des Benutzers
-function updateCurrentGroup(groupId) {
-    firebase.database().ref(`users/${currentUser.uid}/currentGroup`).set(groupId)
-    .then(() => {
-        // Lade die Gruppen oder aktualisiere die UI entsprechend
-        loadUserGroupAndStories(); // Lädt die Gruppeninformationen und Geschichten
-    })
-    .catch(error => {
-        alert("Fehler beim Wechseln der Gruppe: " + error.message);
-    });
-}
-
-// Lade die Gruppeninformationen und Geschichten des Benutzers
-function loadUserGroupAndStories() {
-    const userId = firebase.auth().currentUser.uid;
-    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
-
-    userGroupRef.once('value').then((snapshot) => {
-        const groupId = snapshot.val();
-
-        if (groupId) {
-            // Wenn eine Gruppen-ID vorhanden ist, lade die Gruppeninformationen
-            const groupRef = firebase.database().ref(`groups/${groupId}`);
-            groupRef.once('value').then((groupSnapshot) => {
-                const groupName = groupSnapshot.val()?.name;
-
-                if (groupName) {
-                    // Wenn ein Gruppenname existiert, zeige ihn an und lade die zufällige Geschichte
-                    document.getElementById("currentGroupName").innerText = groupName;
-                    goToRandomStory(); // Zufällige Geschichte anzeigen
-                } else {
-                    console.log("Gruppenname nicht gefunden");
-                }
-            }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
-        } else {
-            console.log("Keine Gruppen-ID im Benutzerprofil gefunden");
-        }
-    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
