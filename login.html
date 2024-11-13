@@ -16,14 +16,14 @@
         }
 
         body {
-    background: url('Login.jpeg') no-repeat center center fixed;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Arial', sans-serif;
-}
+            background: url('Login.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
 
         .auth-container {
             background: white;
@@ -38,11 +38,20 @@
             margin-bottom: 1rem;
             font-size: 24px;
             color: #333;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 0;
         }
 
         .message {
             margin-bottom: 1rem;
             color: red;
+            text-align: center;
         }
 
         input[type="email"],
@@ -79,11 +88,6 @@
             background-color: #0056b3;
         }
 
-        p {
-            text-align: center;
-            margin-top: 1rem;
-        }
-
         a {
             color: #007bff;
             text-decoration: none;
@@ -100,13 +104,12 @@
 </head>
 <body>
     <div id="authContainer" class="auth-container">
-      <div id="loginForm">
-    <h1 style="text-align: center;">StoryX - Ihr seid dran!</h1>
-<p style="font-size: 0.9em; color: #555; margin-top: 0;">Erweckt eure alten Stories wieder zum Leben und teilt pikante Details, die bisher noch niemand kannte</p>
-<div id="loginMessage" class="message"></div>
-<input type="email" id="authEmail" placeholder="E-Mail" required>
-<input type="password" id="authPassword" placeholder="Passwort" required>
-
+        <div id="loginForm">
+            <h1>StoryX - Ihr seid dran!</h1>
+            <p>Erweckt eure alten Stories wieder zum Leben und teilt pikante Details, die bisher noch niemand kannte</p>
+            <div id="loginMessage" class="message"></div>
+            <input type="email" id="authEmail" placeholder="E-Mail" required>
+            <input type="password" id="authPassword" placeholder="Passwort" required>
             <button onclick="login()">Anmelden</button>
             <p>Noch keinen Account? <a href="#" onclick="toggleAuthMode()">Registrieren</a></p>
         </div>
@@ -124,20 +127,18 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
-            authDomain: "stories-c4b2e.firebaseapp.com",
-            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
-            projectId: "stories-c4b2e",
-            storageBucket: "stories-c4b2e.appspot.com",
-            messagingSenderId: "843705586806",
-            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
-            measurementId: "G-TGV27NXDRD"
-        };
+    apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+    authDomain: "stories-c4b2e.firebaseapp.com",
+    databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+    projectId: "stories-c4b2e",
+    storageBucket: "stories-c4b2e.appspot.com",
+    messagingSenderId: "843705586806",
+    appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+    measurementId: "G-TGV27NXDRD"
+};
 
-        // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
 
-        // Anmeldefunktion
         function login() {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
@@ -147,62 +148,73 @@
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then(() => {
                     loginMessage.innerText = "Anmeldung erfolgreich!";
-                    // Nach erfolgreicher Anmeldung zur index.html umleiten
-                    window.location.href = "index.html"; // Deine Hauptseite
+                    window.location.href = "index.html";
                 })
                 .catch((error) => {
                     loginMessage.innerText = `Fehler: ${error.message}`;
                 });
         }
 
-        // Registrierungsfunktion
-       function register() {
-    const username = document.getElementById('registerUsername').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const registerMessage = document.getElementById('registerMessage');
+        function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const registerMessage = document.getElementById('registerMessage');
 
-    // Überprüfen, ob Felder leer sind
-    if (!username || !email || !password) {
-        registerMessage.innerText = "Bitte füllen Sie alle Felder aus.";
-        return;
-    }
+            if (!username || !email || !password) {
+                registerMessage.innerText = "Bitte füllen Sie alle Felder aus.";
+                return;
+            }
 
-    registerMessage.innerText = "Registrierung läuft...";
-    
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-
-            // Benutzername im Authentication-Profil speichern
-            return user.updateProfile({
-                displayName: username
-            }).then(() => {
-                // Benutzername und E-Mail auch in der Realtime Database speichern, falls benötigt
-                return firebase.database().ref(`users/${user.uid}`).set({
-                    username: username,
-                    email: email
+            registerMessage.innerText = "Registrierung läuft...";
+            
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return user.updateProfile({
+                        displayName: username
+                    }).then(() => {
+                        return firebase.database().ref(`users/${user.uid}`).set({
+                            username: username,
+                            email: email
+                        });
+                    });
+                })
+                .then(() => {
+                    registerMessage.innerText = "Registrierung erfolgreich!";
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    registerMessage.innerText = `Fehler: ${error.message}`;
                 });
-            });
-        })
-        .then(() => {
-            registerMessage.innerText = "Registrierung erfolgreich!";
-            // Nach erfolgreicher Registrierung zur index.html umleiten
-            window.location.href = "index.html"; // Deine Hauptseite
-        })
-        .catch((error) => {
-            registerMessage.innerText = `Fehler: ${error.message}`;
-        });
-}
+        }
 
-        // Funktion zum Umschalten zwischen Anmelden und Registrieren
         function toggleAuthMode() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
 
+            if (loginForm.classList.contains('hidden')) {
+                document.getElementById('authEmail').value = document.getElementById('registerEmail').value;
+                document.getElementById('authPassword').value = document.getElementById('registerPassword').value;
+            } else {
+                document.getElementById('registerEmail').value = document.getElementById('authEmail').value;
+                document.getElementById('registerPassword').value = document.getElementById('authPassword').value;
+            }
+
             loginForm.classList.toggle('hidden');
             registerForm.classList.toggle('hidden');
         }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    firebase.auth().onAuthStateChanged(function (user) {
+        if (user && redirectUrl) {
+            window.location.href = redirectUrl; // Leitet den Benutzer zur ursprünglichen URL um
+        }
+    });
+});
     </script>
 </body>
 </html>
