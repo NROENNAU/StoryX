@@ -126,6 +126,7 @@
         <button onclick="joinGroup()">Gruppe beitreten</button>
         <button onclick="createGroup()">Gruppe erstellen</button>
 			<button onclick="copyGroupId()">ID kopieren</button>
+			<button onclick="generateInviteLink()">Einladungslink erstellen</button>
     </div>
 
     <script>
@@ -341,6 +342,121 @@ function copyGroupId() {
                 }).catch(err => {
                     console.error('Fehler beim Kopieren: ', err);
                     alert('Fehler beim Kopieren der ID: ' + err);
+                });
+                document.body.removeChild(popup); // Schließe das Pop-up nach dem Kopieren
+            };
+            popup.appendChild(copyButton);
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Schließen';
+            closeButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
+            popup.appendChild(closeButton);
+
+            document.body.appendChild(popup); // Füge das Pop-up zum Dokument hinzu
+        } else {
+            alert("Keine aktuelle Gruppen-ID gefunden.");
+        }
+    }).catch(err => {
+        console.error('Fehler beim Abrufen der Gruppen-ID: ', err);
+        alert('Fehler beim Abrufen der Gruppen-ID: ' + err);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('groupId'); // Gruppen-ID vom URL-Parameter
+
+    if (groupId) {
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                currentUser = user;
+                confirmGroupJoin(groupId);
+            } else {
+                // Falls nicht angemeldet, zur Login-Seite umleiten
+                window.location.href = "login.html?redirect=yourpage.html?groupId=" + groupId;
+            }
+        });
+    }
+});
+
+function confirmGroupJoin(groupId) {
+    // Popup-Fenster zur Bestätigung des Gruppenbeitritts
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.padding = '20px';
+    popup.style.backgroundColor = '#fff';
+    popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    popup.style.zIndex = '1000';
+
+    const message = document.createElement('p');
+    message.textContent = "Möchten Sie der Gruppe „XY“ beitreten?";
+    popup.appendChild(message);
+
+    const joinButton = document.createElement('button');
+    joinButton.textContent = 'Beitreten';
+    joinButton.onclick = () => {
+        addUserToGroup(groupId);
+        document.body.removeChild(popup); // Schließe das Pop-up
+    };
+    popup.appendChild(joinButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Abbrechen';
+    cancelButton.onclick = () => document.body.removeChild(popup); // Schließe das Pop-up
+    popup.appendChild(cancelButton);
+
+    document.body.appendChild(popup); // Füge das Pop-up zum Dokument hinzu
+}
+
+function addUserToGroup(groupId) {
+    firebase.database().ref('groups/' + groupId + '/members/' + currentUser.uid).set(true).then(() => {
+        alert("Erfolgreich der Gruppe beigetreten.");
+        loadUserGroups(currentUser.uid); // Lade die Gruppen neu
+    }).catch((error) => {
+        alert("Fehler beim Beitreten der Gruppe: " + error.message);
+    });
+}
+
+function generateInviteLink() {
+    firebase.database().ref('users/' + currentUser.uid + '/currentGroup').once('value').then(snapshot => {
+        const currentGroupId = snapshot.val(); // Aktuelle Gruppen-ID abrufen
+
+        if (currentGroupId) {
+            const inviteLink = `${window.location.origin}${window.location.pathname}?groupId=${currentGroupId}`;
+
+            // Erstellen des Popups zum Anzeigen und Kopieren des Einladungslinks
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.left = '50%';
+            popup.style.top = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.padding = '20px';
+            popup.style.backgroundColor = '#fff';
+            popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            popup.style.zIndex = '1000';
+
+            const message = document.createElement('p');
+            message.textContent = "Einladungslink zur Gruppe:";
+            popup.appendChild(message);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = inviteLink; // Setze den Wert auf den Einladungslink
+            input.style.width = '100%';
+            input.style.marginBottom = '10px';
+            popup.appendChild(input);
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Link kopieren';
+            copyButton.onclick = () => {
+                navigator.clipboard.writeText(inviteLink).then(() => {
+                    alert("Einladungslink in die Zwischenablage kopiert: " + inviteLink);
+                }).catch(err => {
+                    console.error('Fehler beim Kopieren: ', err);
+                    alert('Fehler beim Kopieren des Links: ' + err);
                 });
                 document.body.removeChild(popup); // Schließe das Pop-up nach dem Kopieren
             };
