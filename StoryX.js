@@ -94,26 +94,6 @@ function loadUserGroupAndStories() {
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
 
-// Funktion zum Anzeigen des Pop-ups
-function showGroupPopup() {
-    const popup = document.createElement("div");
-    popup.className = "popup"; // CSS-Klasse für das Pop-up
-
-    popup.innerHTML = `
-        <div class="popup-content">
-            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
-            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
-        </div>
-    `;
-    
-    document.body.appendChild(popup);
-
-    // Event Listener für den Button
-    document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
-    });
-}
-
 // Funktion zum Ausblenden aller Container
 function hideAllContainers() {
     storyListContainer.classList.add('hidden');
