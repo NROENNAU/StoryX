@@ -847,8 +847,8 @@ window.onload = function() {
     loadCollageForStory(someStoryId); // Deine Funktion aufrufen
 };
 
+// Überprüfe, ob die URL einen 'groupId' im Hash oder Query-String enthält
 window.onload = function() {
-    // Überprüfe, ob die URL einen 'groupId' im Hash oder Query-String enthält
     const urlParams = new URLSearchParams(window.location.search);  // Query-Parameter
     const groupIdFromQuery = urlParams.get('groupId'); // Auslesen der groupId aus der Query
 
@@ -870,7 +870,7 @@ window.onload = function() {
             }
         });
     } else {
-        // Falls keine groupId vorhanden ist, zeige das allgemeine Pop-up für neue Benutzer
+        // Wenn keine groupId vorhanden ist, zeige das allgemeine Pop-up für neue Benutzer
         showGroupPopup();
     }
 };
@@ -881,23 +881,25 @@ function checkGroupMembership(groupId) {
     userGroupRef.once('value').then(snapshot => {
         if (snapshot.exists()) {
             // Nutzer ist bereits Mitglied der Gruppe
-            confirmGroupSwitch(groupId);
+            loadUserGroupAndStories(groupId);  // Lade die Gruppeninformationen und Geschichten
         } else {
             // Nutzer ist noch kein Mitglied der Gruppe
-            confirmGroupJoin(groupId);
+            showGroupJoinPopup(groupId);  // Zeige das Pop-up, um dem Beitritt zuzustimmen
         }
+    }).catch((error) => {
+        console.error("Fehler beim Überprüfen der Mitgliedschaft: ", error);
     });
 }
 
-// Funktion zum Beitreten einer Gruppe
-function confirmGroupJoin(groupId) {
+// Funktion zum Bestätigen des Beitritts zur Gruppe
+function showGroupJoinPopup(groupId) {
     const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
-        addUserToGroup(groupId);
+        addUserToGroup(groupId);  // Füge den Benutzer zur Gruppe hinzu
     });
     document.body.appendChild(popup);
 }
 
-// Pop-up erstellen
+// Funktion zur Pop-up-Erstellung
 function createPopup(messageText, onConfirm) {
     const popup = document.createElement('div');
     popup.style.position = 'fixed';
@@ -927,4 +929,78 @@ function createPopup(messageText, onConfirm) {
     popup.appendChild(cancelButton);
 
     return popup;
+}
+
+// Funktion zum Hinzufügen des Benutzers zur Gruppe
+function addUserToGroup(groupId) {
+    firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`).set(true)
+    .then(() => {
+        alert("Sie sind der Gruppe erfolgreich beigetreten.");
+        updateCurrentGroup(groupId);
+    })
+    .catch((error) => {
+        alert("Fehler beim Beitreten der Gruppe: " + error.message);
+    });
+}
+
+// Funktion zum Aktualisieren der aktuellen Gruppe des Benutzers
+function updateCurrentGroup(groupId) {
+    firebase.database().ref(`users/${currentUser.uid}/currentGroup`).set(groupId)
+    .then(() => {
+        // Lade die Gruppen oder aktualisiere die UI entsprechend
+        loadUserGroupAndStories(groupId);  // Lädt die Gruppeninformationen und Geschichten
+    })
+    .catch(error => {
+        alert("Fehler beim Wechseln der Gruppe: " + error.message);
+    });
+}
+
+// Lade die Gruppeninformationen und Geschichten des Benutzers
+function loadUserGroupAndStories(groupId) {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const groupId = snapshot.val();
+
+        if (groupId) {
+            // Wenn eine Gruppen-ID vorhanden ist, lade die Gruppeninformationen
+            const groupRef = firebase.database().ref(`groups/${groupId}`);
+            groupRef.once('value').then((groupSnapshot) => {
+                const groupName = groupSnapshot.val()?.name;
+
+                if (groupName) {
+                    // Wenn ein Gruppenname existiert, zeige ihn an und lade die zufällige Geschichte
+                    document.getElementById("currentGroupName").innerText = groupName;
+                    goToRandomStory(); // Zufällige Geschichte anzeigen
+                } else {
+                    // Wenn kein Gruppenname gefunden wurde, zeige das Pop-up
+                    showGroupPopup();
+                }
+            }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
+        } else {
+            // Wenn keine Gruppen-ID vorhanden ist, zeige das Pop-up
+            showGroupPopup();
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Funktion zum Anzeigen des Pop-ups, wenn keine groupId vorhanden ist
+function showGroupPopup() {
+    const popup = document.createElement("div");
+    popup.className = "popup"; // CSS-Klasse für das Pop-up
+
+    popup.innerHTML = `
+        <div class="popup-content">
+            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
+            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+
+    // Event Listener für den Button
+    document.getElementById("startButton").addEventListener("click", () => {
+        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
+    });
 }
