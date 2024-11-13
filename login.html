@@ -205,15 +205,19 @@
             registerForm.classList.toggle('hidden');
         }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
+firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const groupId = hashParams.get('groupId');
 
-    firebase.auth().onAuthStateChanged(function (user) {
-        if (user && redirectUrl) {
-            window.location.href = redirectUrl; // Leitet den Benutzer zur ursprünglichen URL um
+        if (groupId) {
+            // Nach dem Login zur Startseite mit groupId weiterleiten
+            window.location.href = `index.html#groupId=${groupId}`;
+        } else {
+            // Wenn keine groupId vorhanden ist, einfach zur Startseite weiterleiten
+            window.location.href = "index.html";
         }
-    });
+    }
 });
     </script>
 </body>
