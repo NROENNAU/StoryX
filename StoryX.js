@@ -893,6 +893,23 @@ window.onload = function() {
 
 
 // Einladungslink verarbeiten
+
+document.addEventListener("DOMContentLoaded", function () {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const groupId = hashParams.get('groupId');
+
+    if (groupId) {
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                currentUser = user;
+                confirmGroupJoin(groupId);
+            } else {
+                // Falls nicht angemeldet, zur Login-Seite umleiten und groupId beibehalten
+                window.location.href = `login.html#groupId=${groupId}`;
+            }
+        });
+    }
+});
 document.addEventListener("DOMContentLoaded", function () {
     const hashParams = new URLSearchParams(window.location.hash.slice(1)); // Entfernt das '#' und liest die Parameter
     const groupId = hashParams.get('groupId'); // Gruppen-ID vom Hash-Parameter
