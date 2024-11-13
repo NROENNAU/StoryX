@@ -207,8 +207,9 @@
 
 firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
-        const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const groupId = hashParams.get('groupId');
+        // Hole den groupId-Parameter aus der URL (query parameter)
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('groupId');
 
         if (groupId) {
             // Nach dem Login zur Startseite mit groupId weiterleiten
