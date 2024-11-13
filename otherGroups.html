@@ -425,7 +425,7 @@ function generateInviteLink() {
         const currentGroupId = snapshot.val(); // Aktuelle Gruppen-ID abrufen
 
         if (currentGroupId) {
-            const inviteLink = `${window.location.origin}${window.location.pathname}?groupId=${currentGroupId}`;
+            const inviteLink = `${window.location.origin}/index.html?groupId=${currentGroupId}`;
 
             // Erstellen des Popups zum Anzeigen und Kopieren des Einladungslinks
             const popup = document.createElement('div');
