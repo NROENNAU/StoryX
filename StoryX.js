@@ -903,8 +903,9 @@ window.onload = function() {
 // Einladungslink verarbeiten
 
 document.addEventListener("DOMContentLoaded", function () {
-    const hashParams = new URLSearchParams(window.location.hash.slice(1));
-    const groupId = hashParams.get('groupId');
+    // Verwende URLSearchParams, um den groupId aus den Query-Parametern zu holen
+    const urlParams = new URLSearchParams(window.location.search); // Sucht in den Query-Parametern
+    const groupId = urlParams.get('groupId'); // Extrahiert den groupId-Parameter
 
     if (groupId) {
         firebase.auth().onAuthStateChanged(function (user) {
@@ -913,12 +914,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 checkGroupMembership(groupId); // Prüfe Mitgliedschaft
             } else {
                 // Falls nicht angemeldet, zur Login-Seite umleiten und groupId beibehalten
-                window.location.href = `login.html#groupId=${groupId}`;
+                window.location.href = `login.html?groupId=${groupId}`;
             }
         });
     }
 });
-
 function checkGroupMembership(groupId) {
     const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
     userGroupRef.once('value').then(snapshot => {
