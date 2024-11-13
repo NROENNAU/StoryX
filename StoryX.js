@@ -894,8 +894,8 @@ window.onload = function() {
 
 // Einladungslink verarbeiten
 document.addEventListener("DOMContentLoaded", function () {
-    const hash = window.location.hash;
-    const groupId = hash ? hash.split("=")[1] : null;
+    const hashParams = new URLSearchParams(window.location.hash.slice(1)); // Entfernt das '#' und liest die Parameter
+    const groupId = hashParams.get('groupId'); // Gruppen-ID vom Hash-Parameter
 
     if (groupId) {
         firebase.auth().onAuthStateChanged(function (user) {
@@ -903,7 +903,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentUser = user;
                 confirmGroupJoin(groupId);
             } else {
-                window.location.href = "login.html#redirect=/#groupId=" + groupId;
+                // Falls nicht angemeldet, zur Login-Seite umleiten und Hash-Parameter beibehalten
+                window.location.href = "login.html#groupId=" + groupId;
             }
         });
     }
