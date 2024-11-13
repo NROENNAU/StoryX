@@ -51,6 +51,27 @@ let currentUser;
       }
   });
 
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('groupId');
+
+    if (groupId) {
+        // Speichere die `groupId` für spätere Nutzung, z.B. in `sessionStorage`
+        sessionStorage.setItem('groupId', groupId);
+
+        // Rufe deine Funktion auf, um die Gruppe basierend auf `groupId` zu laden
+        loadGroupDetails(groupId);
+    } else {
+        // Optional: Standardaktion, wenn keine `groupId` vorhanden ist
+        console.log("Keine Gruppen-ID gefunden.");
+    }
+});
+
+function loadGroupDetails(groupId) {
+    // Logik hier, um die Details für die Gruppe mit `groupId` zu laden
+    console.log(`Lade Gruppen-Details für ID: ${groupId}`);
+    // Hier könntest du z.B. die Gruppeninformationen aus der Firebase-Datenbank laden.
+}
   function showPopup() {
       const popup = document.getElementById('popup');
       popup.style.display = 'block'; // Pop-up sichtbar machen
