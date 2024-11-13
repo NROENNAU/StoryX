@@ -985,8 +985,8 @@ function updateCurrentGroup(groupId) {
     });
 }
 
+// Funktion zum Anzeigen des Pop-ups, wenn keine groupId vorhanden ist
 function showGroupPopup() {
-    // Wenn keine groupId vorhanden ist, zeige das Standard-Popup an
     const popup = document.createElement("div");
     popup.className = "popup"; // CSS-Klasse für das Pop-up
 
