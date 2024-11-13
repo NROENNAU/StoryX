@@ -850,14 +850,16 @@ window.onload = function() {
 
 // Einladungslink verarbeiten und Gruppen-ID aus der URL entnnehmen
 document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);  // Sucht in den Query-Parametern
-    const groupIdFromQuery = urlParams.get('groupId'); // Extrahiert den groupId-Parameter aus der Query
+    const urlParams = new URLSearchParams(window.location.search);  // Prüft die Query-Parameter
+    const groupIdFromQuery = urlParams.get('groupId'); // Extrahiert den groupId-Parameter aus der URL
 
+    // Prüfe den Hash-Teil der URL
     const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
 
-    // Bevorzugt den Query-String, falls vorhanden. Ansonsten den Fragment-Teil.
+    // Bevorzugt den Query-Parameter, wenn vorhanden. Ansonsten den Hash-Teil.
     const groupId = groupIdFromQuery || groupIdFromHash;
 
+    // Nun sicherstellen, dass die groupId vorhanden ist, bevor wir fortfahren
     if (groupId) {
         // Wenn eine groupId vorhanden ist, prüfe die Gruppenmitgliedschaft
         firebase.auth().onAuthStateChanged(function (user) {
