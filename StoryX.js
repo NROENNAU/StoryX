@@ -903,22 +903,27 @@ window.onload = function() {
 // Einladungslink verarbeiten
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Verwende URLSearchParams, um den groupId aus den Query-Parametern zu holen
-    const urlParams = new URLSearchParams(window.location.search); // Sucht in den Query-Parametern
-    const groupId = urlParams.get('groupId'); // Extrahiert den groupId-Parameter
+    // Überprüfe, ob die URL eine groupId enthält
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('groupId');
 
     if (groupId) {
+        // Wenn eine groupId vorhanden ist, prüfe die Gruppenmitgliedschaft
         firebase.auth().onAuthStateChanged(function (user) {
             if (user) {
                 currentUser = user;
-                checkGroupMembership(groupId); // Prüfe Mitgliedschaft
+                checkGroupMembership(groupId); // Prüfe Mitgliedschaft und zeige ggf. das Popup
             } else {
-                // Falls nicht angemeldet, zur Login-Seite umleiten und groupId beibehalten
+                // Wenn der Benutzer nicht angemeldet ist, leite zur Login-Seite weiter
                 window.location.href = `login.html?groupId=${groupId}`;
             }
         });
+    } else {
+        // Wenn keine groupId vorhanden ist, zeige das allgemeine Popup für neue Benutzer
+        showGroupPopup();
     }
 });
+
 function checkGroupMembership(groupId) {
     const userGroupRef = firebase.database().ref(`groups/${groupId}/members/${currentUser.uid}`);
     userGroupRef.once('value').then(snapshot => {
@@ -997,5 +1002,25 @@ function updateCurrentGroup(groupId) {
     })
     .catch(error => {
         alert("Fehler beim Wechseln der Gruppe: " + error.message);
+    });
+}
+
+function showGroupPopup() {
+    // Wenn keine groupId vorhanden ist, zeige das Standard-Popup an
+    const popup = document.createElement("div");
+    popup.className = "popup"; // CSS-Klasse für das Pop-up
+
+    popup.innerHTML = `
+        <div class="popup-content">
+            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
+            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+
+    // Event Listener für den Button
+    document.getElementById("startButton").addEventListener("click", () => {
+        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
     });
 }
