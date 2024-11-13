@@ -425,9 +425,10 @@ function generateInviteLink() {
         const currentGroupId = snapshot.val(); // Aktuelle Gruppen-ID abrufen
 
         if (currentGroupId) {
-            const inviteLink = `${window.location.origin}/index.html?groupId=${currentGroupId}`;
+            // Einladungslink mit Hash-Fragment für die Gruppen-ID
+            const inviteLink = `https://nroennau.github.io/StoryX/#groupId=${currentGroupId}`;
 
-            // Erstellen des Popups zum Anzeigen und Kopieren des Einladungslinks
+            // Popup erstellen, um den Einladungslink anzuzeigen und zu kopieren
             const popup = document.createElement('div');
             popup.style.position = 'fixed';
             popup.style.left = '50%';
