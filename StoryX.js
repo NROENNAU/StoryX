@@ -883,8 +883,9 @@ window.onload = function() {
 // Einladungslink verarbeiten
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Überprüfe, ob die URL eine groupId enthält
-    const urlParams = new URLSearchParams(window.location.search);
+    // Überprüfe, ob die URL ein groupId im Fragment enthält
+    const hashParams = window.location.hash.substr(1); // Entfernt das # am Anfang
+    const urlParams = new URLSearchParams(hashParams);
     const groupId = urlParams.get('groupId');
 
     if (groupId) {
