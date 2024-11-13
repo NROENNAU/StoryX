@@ -848,22 +848,16 @@ window.onload = function() {
 };
 
 window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);  // Query-Parameter
-    const groupIdFromQuery = urlParams.get('groupId'); // Auslesen der groupId aus der Query
-
-    // Prüfe den Hash-Teil der URL (alles nach dem #)
+    // Extrahieren der groupId aus dem Hash-Teil der URL
     const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
 
-    // Bevorzugt den Query-Parameter, wenn vorhanden. Ansonsten den Hash-Teil.
-    const groupId = groupIdFromQuery || groupIdFromHash;
+    console.log("Group ID aus URL (Hash):", groupIdFromHash); // Debug: Zeigt die groupId aus dem Hash-Teil der URL
 
-    console.log("Group ID aus URL:", groupId); // Debug: Zeigt die groupId aus der URL
-
-    if (groupId) {
-        // Wenn eine gültige groupId vorhanden ist, zeige sofort das Pop-up zur Gruppenmitgliedschaft
-        showGroupPopup(groupId);
+    if (groupIdFromHash) {
+        // Wenn eine gültige groupId im Hash-Teil vorhanden ist, zeige sofort das Pop-up zur Gruppenmitgliedschaft
+        showGroupPopup(groupIdFromHash);
     } else {
-        console.log("Keine groupId gefunden, keine Aktion erforderlich.");
+        console.log("Keine groupId im Hash gefunden, keine Aktion erforderlich.");
     }
 };
 
