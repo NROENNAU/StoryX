@@ -30,11 +30,19 @@ firebase.auth().onAuthStateChanged((user) => {
         authContainer.classList.add('hidden');
         contentContainer.classList.remove('hidden');
     } else {
-        // Umleitung zur Login-Seite, wenn kein Benutzer angemeldet ist
-        window.location.href = 'login.html';
+        // Wenn kein Benutzer angemeldet ist, prüfen, ob eine groupId im URL-Hash vorhanden ist
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const groupId = hashParams.get('groupId'); // groupId aus dem URL-Hash extrahieren
+
+        if (groupId) {
+            // Falls groupId vorhanden ist, zur Login-Seite mit groupId als URL-Parameter umleiten
+            window.location.href = `login.html?groupId=${groupId}`;
+        } else {
+            // Ansonsten einfach zur Login-Seite ohne groupId
+            window.location.href = 'login.html';
+        }
     }
 });
-
 // Logout-Funktion
 function logout() {
     firebase.auth().signOut().then(() => {
