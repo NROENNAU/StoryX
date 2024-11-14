@@ -847,7 +847,7 @@ window.onload = function() {
     loadCollageForStory(someStoryId); // Deine Funktion aufrufen
 };
 
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Extrahieren der groupId aus dem Hash-Teil der URL
     const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
 
