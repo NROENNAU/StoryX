@@ -25,21 +25,17 @@ const imageCollageContainer = document.getElementById('imageCollageContainer')
 // Überprüfen, ob der Benutzer angemeldet ist, und Zeigen des Benutzernamens
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // Wenn Benutzer angemeldet, E-Mail oder Name anzeigen und Inhalte laden
         document.getElementById('usernameDisplay').innerText = user.email;
         loadUserGroupAndStories();
         document.getElementById('authContainer').classList.add('hidden');
         document.getElementById('contentContainer').classList.remove('hidden');
     } else {
-        // Wenn kein Benutzer angemeldet ist, zur Login-Seite weiterleiten
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
         const groupId = hashParams.get('groupId');
 
         if (groupId) {
-            // Weiterleitung zur Login-Seite mit groupId als Parameter
             window.location.href = `login.html?groupId=${groupId}`;
         } else {
-            // Weiterleitung zur Login-Seite ohne groupId
             window.location.href = 'login.html';
         }
     }
@@ -56,17 +52,13 @@ function loadUserGroupAndStories() {
 
         if (groupIdFromURL) {
             if (currentGroupId === groupIdFromURL) {
-                // Benutzer ist bereits in der Gruppe aus dem Link
                 showAlreadyInGroupPopup(groupIdFromURL);
             } else {
-                // Überprüfen, ob Benutzer Mitglied der Gruppe aus dem Link ist
                 checkGroupMembershipAndShowPopup(userId, groupIdFromURL);
             }
         } else if (currentGroupId) {
-            // Keine `groupId` in der URL, aktuelle Gruppe laden
             loadGroupInfo(currentGroupId);
         } else {
-            // Weder `groupId` in URL noch aktuelle Gruppe -> Willkommens-Pop-up
             showGroupPopup();
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
@@ -116,11 +108,39 @@ function showJoinGroupPopup(groupId) {
     document.body.appendChild(popup);
 }
 
-// Zeigt Pop-up, wenn der Benutzer bereits Mitglied ist
+// Zeigt das Pop-up an, wenn der Benutzer bereits Mitglied ist und bietet Option zum Wechsel
 function showAlreadyInGroupPopup(groupId) {
-    const popup = createPopup(`Sie sind bereits Mitglied der Gruppe: ${groupId}`, () => {
-        loadUserGroupAndStories();
-    });
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.padding = '20px';
+    popup.style.backgroundColor = '#fff';
+    popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    popup.style.zIndex = '1000';
+
+    const message = document.createElement('p');
+    message.textContent = `Sie sind bereits Mitglied der Gruppe: ${groupId}`;
+    popup.appendChild(message);
+
+    const switchButton = document.createElement('button');
+    switchButton.textContent = 'In Gruppe wechseln';
+    switchButton.onclick = () => {
+        updateCurrentGroup(groupId); // Wechselt in die Gruppe
+        document.body.removeChild(popup);
+        window.location.href = 'index.html'; // Lädt index.html neu
+    };
+    popup.appendChild(switchButton);
+
+    const okButton = document.createElement('button');
+    okButton.textContent = 'OK';
+    okButton.onclick = () => {
+        document.body.removeChild(popup);
+        window.location.href = 'index.html'; // Zurück zu index.html ohne Gruppenwechsel
+    };
+    popup.appendChild(okButton);
+
     document.body.appendChild(popup);
 }
 
@@ -169,7 +189,7 @@ function createPopup(messageText, onConfirm) {
     return popup;
 }
 
-// Funktion zur Aktualisierung der aktuellen Gruppe
+// Funktion zum Aktualisieren der aktuellen Gruppe
 function updateCurrentGroup(groupId) {
     const userId = firebase.auth().currentUser.uid;
     firebase.database().ref(`users/${userId}/currentGroup`).set(groupId)
@@ -198,6 +218,7 @@ function showGroupPopup() {
     document.getElementById("startButton").addEventListener("click", () => {
         window.location.href = "otherGroups.html";
     });
+}
 }// Logout-Funktion
 function logout() {
     firebase.auth().signOut().then(() => {
