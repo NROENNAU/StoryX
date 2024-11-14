@@ -25,26 +25,27 @@ const imageCollageContainer = document.getElementById('imageCollageContainer')
 // Überprüfen, ob der Benutzer angemeldet ist, und Zeigen des Benutzernamens
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        usernameDisplay.innerText = user.email; // Zeigt E-Mail oder Namen des Benutzers an
-        loadUserGroupAndStories(); // Lädt Gruppen und Stories des Benutzers
-        authContainer.classList.add('hidden');
-        contentContainer.classList.remove('hidden');
+        // Wenn Benutzer angemeldet, E-Mail oder Name anzeigen und Inhalte laden
+        document.getElementById('usernameDisplay').innerText = user.email;
+        loadUserGroupAndStories();
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('contentContainer').classList.remove('hidden');
     } else {
-        // Wenn kein Benutzer angemeldet ist, prüfen, ob eine groupId im URL-Hash vorhanden ist
+        // Wenn kein Benutzer angemeldet ist, zur Login-Seite weiterleiten
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const groupId = hashParams.get('groupId'); // Extrahieren der groupId aus dem URL-Hash
+        const groupId = hashParams.get('groupId');
 
         if (groupId) {
-            // Wenn groupId vorhanden, zur Login-Seite mit groupId als URL-Parameter umleiten
+            // Weiterleitung zur Login-Seite mit groupId als Parameter
             window.location.href = `login.html?groupId=${groupId}`;
         } else {
-            // Andernfalls einfach zur Login-Seite ohne groupId umleiten
+            // Weiterleitung zur Login-Seite ohne groupId
             window.location.href = 'login.html';
         }
     }
 });
 
-// Load user's group name and stories
+// Lade Benutzergruppe und Geschichten
 function loadUserGroupAndStories() {
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
@@ -55,69 +56,59 @@ function loadUserGroupAndStories() {
 
         if (groupIdFromURL) {
             if (currentGroupId === groupIdFromURL) {
-                // Benutzer ist bereits Mitglied in der Gruppe aus dem Link
-                console.log("Benutzer ist bereits in der Gruppe aus dem Link:", groupIdFromURL);
+                // Benutzer ist bereits in der Gruppe aus dem Link
                 showAlreadyInGroupPopup(groupIdFromURL);
             } else {
-                // Prüfe, ob der Benutzer Mitglied in der Gruppe aus dem Link ist
-                console.log("Benutzer ist nicht Mitglied in der Gruppe aus dem Link. Zeige Beitrittsoption.");
+                // Überprüfen, ob Benutzer Mitglied der Gruppe aus dem Link ist
                 checkGroupMembershipAndShowPopup(userId, groupIdFromURL);
             }
         } else if (currentGroupId) {
-            // Keine `groupId` in der URL, aber der Benutzer hat eine aktuelle Gruppe
-            console.log("Lade aktuelle Gruppe des Benutzers:", currentGroupId);
+            // Keine `groupId` in der URL, aktuelle Gruppe laden
             loadGroupInfo(currentGroupId);
         } else {
-            // Keine `groupId` in URL und keine aktuelle Gruppe des Benutzers -> Willkommens-Pop-up
-            console.log("Kein `groupId` in der URL und keine aktuelle Gruppe. Zeige Willkommens-Pop-up.");
+            // Weder `groupId` in URL noch aktuelle Gruppe -> Willkommens-Pop-up
             showGroupPopup();
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
 
-// Hilfsfunktion, um die Gruppen-ID aus der URL zu extrahieren
+// Hilfsfunktion zur Extraktion der `groupId` aus der URL
 function getGroupIdFromURL() {
-    const urlParams = new URLSearchParams(window.location.search); // Prüft die Query-Parameter
-    const groupIdFromQuery = urlParams.get('groupId'); // Extrahiert den groupId-Parameter aus der URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupIdFromQuery = urlParams.get('groupId');
     const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
     return groupIdFromQuery || groupIdFromHash;
 }
 
-// Prüft, ob der Benutzer Mitglied in der Gruppe ist und zeigt ggf. das Beitritts-Pop-up an
+// Überprüfen, ob Benutzer Mitglied der Gruppe ist und ggf. Beitritts-Pop-up anzeigen
 function checkGroupMembershipAndShowPopup(userId, groupIdFromURL) {
     const userGroupRef = firebase.database().ref(`groups/${groupIdFromURL}/members/${userId}`);
     
     userGroupRef.once('value').then(snapshot => {
         if (snapshot.exists()) {
-            // Benutzer ist Mitglied der Gruppe aus dem Link
-            console.log("Benutzer ist bereits Mitglied der Gruppe:", groupIdFromURL);
             showAlreadyInGroupPopup(groupIdFromURL);
         } else {
-            // Benutzer ist noch nicht Mitglied der Gruppe aus dem Link -> Beitritts-Pop-up
-            console.log("Benutzer ist noch nicht Mitglied der Gruppe. Zeige Beitritts-Pop-up für:", groupIdFromURL);
             showJoinGroupPopup(groupIdFromURL);
         }
     }).catch((error) => console.error("Fehler beim Überprüfen der Gruppenmitgliedschaft: ", error));
 }
 
-// Funktion zum Anzeigen der aktuellen Gruppe
+// Funktion zum Laden der Gruppeninformationen und Zufallsstory
 function loadGroupInfo(groupId) {
     const groupRef = firebase.database().ref(`groups/${groupId}`);
     groupRef.once('value').then((groupSnapshot) => {
         const groupName = groupSnapshot.val()?.name;
         
         if (groupName) {
-            console.log("Aktuelle Gruppe geladen:", groupName);
             document.getElementById("currentGroupName").innerText = groupName;
-            goToRandomStory(); // Zufällige Geschichte anzeigen
+            goToRandomStory();
         } else {
-            console.log("Kein Gruppenname gefunden für:", groupId);
             showGroupPopup();
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
 }
 
-// Zeigt das Pop-up zur Bestätigung des Gruppenbeitritts an
+// Zeigt das Pop-up zur Bestätigung des Gruppenbeitritts
 function showJoinGroupPopup(groupId) {
     const popup = createPopup("Möchten Sie der Gruppe beitreten?", () => {
         addUserToGroup(groupId);
@@ -125,7 +116,7 @@ function showJoinGroupPopup(groupId) {
     document.body.appendChild(popup);
 }
 
-// Zeigt das Pop-up an, wenn der Benutzer bereits Mitglied in der Gruppe aus dem Link ist
+// Zeigt Pop-up, wenn der Benutzer bereits Mitglied ist
 function showAlreadyInGroupPopup(groupId) {
     const popup = createPopup(`Sie sind bereits Mitglied der Gruppe: ${groupId}`, () => {
         loadUserGroupAndStories();
@@ -138,7 +129,6 @@ function addUserToGroup(groupId) {
     const userId = firebase.auth().currentUser.uid;
     firebase.database().ref(`groups/${groupId}/members/${userId}`).set(true)
     .then(() => {
-        console.log("Benutzer der Gruppe erfolgreich beigetreten:", groupId);
         alert("Sie sind der Gruppe erfolgreich beigetreten.");
         updateCurrentGroup(groupId);
     })
@@ -147,7 +137,7 @@ function addUserToGroup(groupId) {
     });
 }
 
-// Funktion zur Pop-up-Erstellung
+// Funktion zur Erstellung eines Pop-ups
 function createPopup(messageText, onConfirm) {
     const popup = document.createElement('div');
     popup.style.position = 'fixed';
@@ -167,25 +157,24 @@ function createPopup(messageText, onConfirm) {
     confirmButton.textContent = 'Ja';
     confirmButton.onclick = () => {
         onConfirm();
-        document.body.removeChild(popup); // Schließt das Pop-up
+        document.body.removeChild(popup);
     };
     popup.appendChild(confirmButton);
 
     const cancelButton = document.createElement('button');
     cancelButton.textContent = 'Nein';
-    cancelButton.onclick = () => document.body.removeChild(popup); // Schließt das Pop-up
+    cancelButton.onclick = () => document.body.removeChild(popup);
     popup.appendChild(cancelButton);
 
     return popup;
 }
 
-// Funktion zum Aktualisieren der aktuellen Gruppe des Benutzers
+// Funktion zur Aktualisierung der aktuellen Gruppe
 function updateCurrentGroup(groupId) {
     const userId = firebase.auth().currentUser.uid;
     firebase.database().ref(`users/${userId}/currentGroup`).set(groupId)
     .then(() => {
-        console.log("Aktuelle Gruppe des Benutzers aktualisiert:", groupId);
-        loadUserGroupAndStories(); // Lädt die Gruppeninformationen und Geschichten
+        loadUserGroupAndStories();
     })
     .catch(error => {
         alert("Fehler beim Wechseln der Gruppe: " + error.message);
@@ -195,7 +184,7 @@ function updateCurrentGroup(groupId) {
 // Funktion zum Anzeigen des Willkommens-Pop-ups
 function showGroupPopup() {
     const popup = document.createElement("div");
-    popup.className = "popup"; // CSS-Klasse für das Pop-up
+    popup.className = "popup";
 
     popup.innerHTML = `
         <div class="popup-content">
@@ -206,12 +195,10 @@ function showGroupPopup() {
     
     document.body.appendChild(popup);
 
-    // Event Listener für den Button
     document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = "otherGroups.html"; // Weiterleitung zur Seite otherGroups.html
+        window.location.href = "otherGroups.html";
     });
-}
-// Logout-Funktion
+}// Logout-Funktion
 function logout() {
     firebase.auth().signOut().then(() => {
         // Erfolgreich abgemeldet
