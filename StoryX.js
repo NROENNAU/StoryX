@@ -136,22 +136,6 @@ async function showAlreadyInGroupPopup(groupId) {
     );
     document.body.appendChild(popup);
 }
-// Zeigt das Pop-up an, wenn der Benutzer bereits Mitglied in der Gruppe aus dem Link ist
-function showAlreadyInGroupPopup(groupId) {
-    const popup = createPopup(
-        `Sie sind bereits Mitglied der Gruppe: ${groupId}. Möchten Sie in diese Gruppe wechseln (Ihre Mitgliedschaft in der aktuellen Gruppe bleibt natürlich bestehen)?`, 
-        () => {
-            updateCurrentGroup(groupId); // Gruppe wechseln
-        }, 
-        () => {
-            // In aktueller Gruppe bleiben: Gruppen-ID aus URL entfernen und auf index.html umleiten
-            const url = new URL(window.location.href);
-            url.searchParams.delete('groupId'); // Entfernt die groupId aus den Query-Parametern
-            window.location.href = url.pathname; // Leitet auf index.html ohne groupId weiter
-        }
-    );
-    document.body.appendChild(popup);
-}
 
 async function showJoinGroupPopup(groupId) {
     const groupName = await getGroupName(groupId); // Gruppennamen laden
