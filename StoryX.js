@@ -153,22 +153,24 @@ function showAlreadyInGroupPopup(groupId) {
     document.body.appendChild(popup);
 }
 
-function showJoinGroupPopup(groupId) {
-    const popup = createPopup(
-        `Sie sind noch kein Mitglied der Gruppe: ${groupId}. Möchten Sie der Gruppe beitreten?`, 
+async function showJoinGroupPopup(groupId) {
+    const groupName = await getGroupName(groupId); // Gruppennamen laden
+    const popup = createModernPopup(
+        `Du bist noch kein Mitglied der Gruppe <strong>${groupName}</strong>. Möchtest du der Gruppe beitreten?`, 
+        "Gruppe beitreten", 
+        "Abbrechen", 
         () => {
             joinGroup(groupId); // Gruppe beitreten
         }, 
         () => {
-            // Nicht beitreten: Gruppen-ID aus URL entfernen und auf index.html umleiten
+            // Gruppen-ID aus URL entfernen und auf index.html umleiten
             const url = new URL(window.location.href);
-            url.searchParams.delete('groupId'); // Entfernt die groupId aus den Query-Parametern
-            window.location.href = url.pathname; // Leitet auf index.html ohne groupId weiter
+            url.searchParams.delete('groupId'); 
+            window.location.href = url.pathname; 
         }
     );
     document.body.appendChild(popup);
 }
-
 // Funktion zum Beitreten einer Gruppe
 async function joinGroup(groupId) {
     const userId = firebase.auth().currentUser.uid;
