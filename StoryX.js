@@ -118,7 +118,24 @@ async function loadGroupInfo(groupId) {
         console.error("Fehler beim Abrufen der Gruppendaten:", error);
     }
 }
-
+async function showAlreadyInGroupPopup(groupId) {
+    const groupName = await getGroupName(groupId); // Gruppennamen laden
+    const popup = createModernPopup(
+        `Du bist bereits Mitglied der Gruppe <strong>${groupName}</strong>. Möchtest du in diese Gruppe wechseln?`, 
+        "In Gruppe wechseln", 
+        "Abbrechen", 
+        () => {
+            updateCurrentGroup(groupId); // Gruppe wechseln
+        }, 
+        () => {
+            // Gruppen-ID aus URL entfernen und auf index.html umleiten
+            const url = new URL(window.location.href);
+            url.searchParams.delete('groupId'); 
+            window.location.href = url.pathname; 
+        }
+    );
+    document.body.appendChild(popup);
+}
 // Zeigt das Pop-up an, wenn der Benutzer bereits Mitglied in der Gruppe aus dem Link ist
 function showAlreadyInGroupPopup(groupId) {
     const popup = createPopup(
