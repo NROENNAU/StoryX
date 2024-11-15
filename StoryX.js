@@ -127,7 +127,8 @@ function showAlreadyInGroupPopup(groupId) {
             updateCurrentGroup(groupId); // Gruppe wechseln
         }, 
         () => {
-            loadUserGroupAndStories(); // Inhalte der aktuellen Gruppe laden
+            // Abbrechen: Weiterleitung auf index.html ohne Gruppen-ID
+            window.location.href = 'index.html';
         }
     );
     document.body.appendChild(popup);
