@@ -205,20 +205,15 @@
             registerForm.classList.toggle('hidden');
         }
 
-firebase.auth().onAuthStateChanged(function (user) {
-    if (user) {
-        // Hole den groupId-Parameter aus der URL (query parameter)
-        const urlParams = new URLSearchParams(window.location.search);
-        const groupId = urlParams.get('groupId');
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
 
-        if (groupId) {
-            // Nach dem Login zur Startseite mit groupId weiterleiten
-            window.location.href = `index.html#groupId=${groupId}`;
-        } else {
-            // Wenn keine groupId vorhanden ist, einfach zur Startseite weiterleiten
-            window.location.href = "index.html";
+    firebase.auth().onAuthStateChanged(function (user) {
+        if (user && redirectUrl) {
+            window.location.href = redirectUrl; // Leitet den Benutzer zur ursprünglichen URL um
         }
-    }
+    });
 });
     </script>
 </body>
