@@ -136,6 +136,39 @@ function showAlreadyInGroupPopup(groupId) {
     document.body.appendChild(popup);
 }
 
+function showJoinGroupPopup(groupId) {
+    const popup = createPopup(
+        `Sie sind noch kein Mitglied der Gruppe: ${groupId}. Möchten Sie der Gruppe beitreten?`, 
+        () => {
+            joinGroup(groupId); // Gruppe beitreten
+        }, 
+        () => {
+            // Abbrechen: Gruppen-ID aus URL entfernen und auf index.html umleiten
+            const url = new URL(window.location.href);
+            url.searchParams.delete('groupId'); // Entfernt die groupId aus den Query-Parametern
+            window.location.href = url.pathname; // Leitet auf index.html ohne groupId weiter
+        }
+    );
+    document.body.appendChild(popup);
+}
+
+// Funktion zum Beitreten einer Gruppe
+async function joinGroup(groupId) {
+    const userId = firebase.auth().currentUser.uid;
+    const groupRef = firebase.database().ref(`groups/${groupId}/members/${userId}`);
+    const userRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    try {
+        await groupRef.set(true); // Benutzer in Gruppenmitgliedschaft einfügen
+        await userRef.set(groupId); // Benutzergruppe aktualisieren
+        console.log("Benutzer ist der Gruppe beigetreten:", groupId);
+        window.location.href = 'index.html'; // Weiterleitung nach erfolgreichem Beitritt
+    } catch (error) {
+        console.error("Fehler beim Beitritt zur Gruppe:", error);
+        alert("Beitritt zur Gruppe fehlgeschlagen: " + error.message);
+    }
+}
+
 // Pop-up-Erstellung mit zwei Buttons (Bestätigen und Abbrechen)
 function createPopup(messageText, onConfirm, onCancel) {
     const popup = document.createElement('div');
