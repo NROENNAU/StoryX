@@ -127,8 +127,10 @@ function showAlreadyInGroupPopup(groupId) {
             updateCurrentGroup(groupId); // Gruppe wechseln
         }, 
         () => {
-            // Abbrechen: Weiterleitung auf index.html ohne Gruppen-ID
-            window.location.href = 'index.html';
+            // Abbrechen: Gruppen-ID aus URL entfernen und auf index.html umleiten
+            const url = new URL(window.location.href);
+            url.searchParams.delete('groupId'); // Entfernt die groupId aus den Query-Parametern
+            window.location.href = url.pathname; // Leitet auf index.html ohne groupId weiter
         }
     );
     document.body.appendChild(popup);
