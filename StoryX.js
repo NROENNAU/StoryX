@@ -22,7 +22,108 @@ const randomStoryContainer = document.getElementById('randomStoryContainer');
 const storyInput = document.getElementById('storyInput');
 const imageCollageContainer = document.getElementById('imageCollageContainer')
 
+// Überprüfen, ob der Benutzer angemeldet ist, und Zeigen des Benutzernamens
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('usernameDisplay').innerText = user.email;
+        loadUserGroupAndStories();
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('contentContainer').classList.remove('hidden');
+    } else {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const groupId = hashParams.get('groupId');
 
+        if (groupId) {
+            window.location.href = `login.html?groupId=${groupId}`;
+        } else {
+            window.location.href = 'login.html';
+        }
+    }
+});
+
+// Lade Benutzergruppe und Geschichten
+function loadUserGroupAndStories() {
+    const userId = firebase.auth().currentUser.uid;
+    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+
+    userGroupRef.once('value').then((snapshot) => {
+        const currentGroupId = snapshot.val();
+        const groupIdFromURL = getGroupIdFromURL();
+
+        if (groupIdFromURL) {
+            if (currentGroupId === groupIdFromURL) {
+                // Benutzer ist bereits in der Gruppe aus der URL
+                showAlreadyInGroupPopup(groupIdFromURL);
+            } else {
+                // Prüfen, ob Benutzer Mitglied in der Gruppe aus der URL ist
+                checkGroupMembershipAndShowPopup(userId, groupIdFromURL);
+            }
+        } else if (currentGroupId) {
+            // Keine Gruppen-ID in der URL -> Lade aktuelle Gruppe des Benutzers
+            loadGroupInfo(currentGroupId);
+        } else {
+            // Keine Gruppen-ID und keine aktuelle Gruppe -> Zeige Willkommens-Pop-up
+            showGroupPopup();
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
+}
+
+// Hilfsfunktion zur Extraktion der `groupId` aus der URL
+function getGroupIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupIdFromQuery = urlParams.get('groupId');
+    const groupIdFromHash = window.location.hash ? new URLSearchParams(window.location.hash.substr(1)).get('groupId') : null;
+    return groupIdFromQuery || groupIdFromHash;
+}
+
+// Überprüfen, ob Benutzer Mitglied der Gruppe ist und ggf. Beitritts-Pop-up anzeigen
+function checkGroupMembershipAndShowPopup(userId, groupIdFromURL) {
+    const userGroupRef = firebase.database().ref(`groups/${groupIdFromURL}/members/${userId}`);
+    
+    userGroupRef.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+            showAlreadyInGroupPopup(groupIdFromURL);
+        } else {
+            showJoinGroupPopup(groupIdFromURL);
+        }
+    }).catch((error) => console.error("Fehler beim Überprüfen der Gruppenmitgliedschaft: ", error));
+}
+
+// Funktion zum Laden der Gruppeninformationen und Zufallsstory
+function loadGroupInfo(groupId) {
+    const groupRef = firebase.database().ref(`groups/${groupId}`);
+    groupRef.once('value').then((groupSnapshot) => {
+        const groupName = groupSnapshot.val()?.name;
+        
+        if (groupName) {
+            console.log("Aktuelle Gruppe geladen:", groupName);
+            document.getElementById("currentGroupName").innerText = groupName;
+            goToRandomStory(); // Zufällige Geschichte anzeigen
+        } else {
+            console.log("Kein Gruppenname gefunden für:", groupId);
+            showGroupPopup();
+        }
+    }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
+}
+
+// Funktion zum Anzeigen des Willkommens-Pop-ups
+function showGroupPopup() {
+    const popup = document.createElement("div");
+    popup.className = "popup";
+
+    popup.innerHTML = `
+        <div class="popup-content">
+            <p><b>Willkommen bei StoryX</b><br>Sind wir nicht alle etwas hängen geblieben? Teile jetzt deine alten Stories mit deinen Freunden und lasse noch nie bekannte Details aufblitzen.</p>
+            <button id="startButton">Jetzt Gruppe gründen oder beitreten</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+
+    document.getElementById("startButton").addEventListener("click", () => {
+        window.location.href = "otherGroups.html";
+    });
+}
 function logout() {
     firebase.auth().signOut().then(() => {
         // Erfolgreich abgemeldet
