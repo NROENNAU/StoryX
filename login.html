@@ -205,18 +205,34 @@
             registerForm.classList.toggle('hidden');
         }
 
-document.addEventListener("DOMContentLoaded", function () {
+function getGroupIdFromURL() {
+    // Versucht zuerst, den groupId aus dem URL-Hash zu extrahieren
+    const hashParams = new URLSearchParams(window.location.hash.substr(1));
+    const groupIdFromHash = hashParams.get('groupId');
+    
+    if (groupIdFromHash) {
+        return groupIdFromHash;
+    }
+
+    // Falls nicht im Hash, dann aus den URL-Parametern extrahieren
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('groupId');
+}
+
+        document.addEventListener("DOMContentLoaded", function () {
     // Extrahiert die `groupId` aus der URL
     const groupId = getGroupIdFromURL();
-    console.log(groupId); // Zeigt die `groupId` aus dem Hash an
+    console.log(groupId); // Zeigt die `groupId` aus der URL an
 
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get('redirect');
 
     // Überprüft den Authentifizierungsstatus des Benutzers
     firebase.auth().onAuthStateChanged(function (user) {
-        if (user && redirectUrl) {
-            window.location.href = redirectUrl; // Leitet den Benutzer zur ursprünglichen URL um
+        if (user) {
+            // Falls die `groupId` vorhanden ist, zur Zielseite mit groupId umleiten
+            let redirectUrlWithGroupId = redirectUrl ? `${redirectUrl}#groupId=${groupId}` : `index.html#groupId=${groupId}`;
+            window.location.href = redirectUrlWithGroupId;
         }
     });
 });
