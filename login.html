@@ -205,6 +205,16 @@
             registerForm.classList.toggle('hidden');
         }
 
+// Hilfsfunktion zur Extraktion der `groupId` aus der URL
+function getGroupIdFromURL() {
+    // Prüft, ob die URL einen Hash enthält
+    const hashParams = new URLSearchParams(window.location.hash.substr(1)); // Entferrnt das '#' und parst den Hash
+    const groupIdFromHash = hashParams.get('groupId');
+    
+    // Rückgabe des extrahierten Wertes oder null, falls nicht vorhanden
+    return groupIdFromHash;
+}
+        
 document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get('redirect');
