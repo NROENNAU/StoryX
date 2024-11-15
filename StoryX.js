@@ -105,7 +105,68 @@ function loadGroupInfo(groupId) {
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppendaten: ", error));
 }
+function showAlreadyInGroupPopup(groupId) {
+    const popup = createPopup(
+        `Sie sind bereits Mitglied der Gruppe: ${groupId}. Möchten Sie in diese Gruppe wechseln?`, 
+        () => {
+            updateCurrentGroup(groupId); // Gruppe wechseln
+        }, 
+        () => {
+            loadUserGroupAndStories(); // Inhalte der aktuellen Gruppe laden
+        }
+    );
+    document.body.appendChild(popup);
+}
 
+// Pop-up-Erstellung mit zwei Buttons (Bestätigen und Abbrechen)
+function createPopup(messageText, onConfirm, onCancel) {
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.padding = '20px';
+    popup.style.backgroundColor = '#fff';
+    popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    popup.style.zIndex = '1000';
+
+    const message = document.createElement('p');
+    message.textContent = messageText;
+    popup.appendChild(message);
+
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'In Gruppe wechseln';
+    confirmButton.onclick = () => {
+        onConfirm(); // Aktion bei Bestätigung
+        document.body.removeChild(popup); // Pop-up schließen
+    };
+    popup.appendChild(confirmButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Abbrechen';
+    cancelButton.style.marginLeft = '10px';
+    cancelButton.onclick = () => {
+        onCancel(); // Aktion bei Abbruch
+        document.body.removeChild(popup); // Pop-up schließen
+    };
+    popup.appendChild(cancelButton);
+
+    return popup;
+}
+
+// Funktion zur Aktualisierung der aktuellen Gruppe
+function updateCurrentGroup(groupId) {
+    const userId = firebase.auth().currentUser.uid;
+    firebase.database().ref(`users/${userId}/currentGroup`).set(groupId)
+        .then(() => {
+            console.log("Aktuelle Gruppe des Benutzers aktualisiert:", groupId);
+            // Seite neu laden, um Inhalte der neuen Gruppe anzuzeigen
+            loadUserGroupAndStories();
+        })
+        .catch(error => {
+            alert("Fehler beim Wechseln der Gruppe: " + error.message);
+        });
+}
 // Funktion zum Anzeigen des Willkommens-Pop-ups
 function showGroupPopup() {
     const popup = document.createElement("div");
