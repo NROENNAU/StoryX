@@ -188,38 +188,42 @@ async function joinGroup(groupId) {
     }
 }
 
+async function getGroupName(groupId) {
+    const groupRef = firebase.database().ref(`groups/${groupId}`);
+    try {
+        const snapshot = await groupRef.once('value');
+        return snapshot.val()?.name || "Unbekannte Gruppe"; // Fallback-Name
+    } catch (error) {
+        console.error("Fehler beim Abrufen des Gruppennamens:", error);
+        return "Unbekannte Gruppe";
+    }
+}
+
 // Pop-up-Erstellung mit zwei Buttons (Bestätigen und Abbrechen)
-function createPopup(messageText, onConfirm, onCancel) {
+function createModernPopup(messageHTML, confirmText, cancelText, onConfirm, onCancel) {
     const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.left = '50%';
-    popup.style.top = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.padding = '20px';
-    popup.style.backgroundColor = '#fff';
-    popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-    popup.style.zIndex = '1000';
+    popup.className = 'modern-popup';
 
-    const message = document.createElement('p');
-    message.textContent = messageText;
-    popup.appendChild(message);
+    popup.innerHTML = `
+        <div class="modern-popup-content">
+            <p>${messageHTML}</p>
+            <div class="modern-popup-buttons">
+                <button class="confirm-button">${confirmText}</button>
+                <button class="cancel-button">${cancelText}</button>
+            </div>
+        </div>
+    `;
 
-    const confirmButton = document.createElement('button');
-    confirmButton.textContent = 'In Gruppe wechseln';
-    confirmButton.onclick = () => {
-        onConfirm(); // Aktion bei Bestätigung
-        document.body.removeChild(popup); // Pop-up schließen
+    // Event-Listener für Buttons
+    popup.querySelector('.confirm-button').onclick = () => {
+        onConfirm();
+        document.body.removeChild(popup);
     };
-    popup.appendChild(confirmButton);
 
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Abbrechen';
-    cancelButton.style.marginLeft = '10px';
-    cancelButton.onclick = () => {
-        onCancel(); // Aktion bei Abbruch
-        document.body.removeChild(popup); // Pop-up schließen
+    popup.querySelector('.cancel-button').onclick = () => {
+        onCancel();
+        document.body.removeChild(popup);
     };
-    popup.appendChild(cancelButton);
 
     return popup;
 }
