@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <style>
-        * {
+      * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -109,7 +109,12 @@
             <p>Erweckt eure alten Stories wieder zum Leben und teilt pikante Details, die bisher noch niemand kannte</p>
             <div id="loginMessage" class="message"></div>
             <input type="email" id="authEmail" placeholder="E-Mail" required>
-            <input type="password" id="authPassword" placeholder="Passwort" required>
+            <div>
+                <input type="password" id="authPassword" placeholder="Passwort" required>
+                <label>
+                    <input type="checkbox" onclick="togglePasswordVisibility('authPassword')"> Passwort anzeigen
+                </label>
+            </div>
             <button onclick="login()">Anmelden</button>
             <p>Noch keinen Account? <a href="#" onclick="toggleAuthMode()">Registrieren</a></p>
         </div>
@@ -119,7 +124,12 @@
             <div id="registerMessage" class="message"></div>
             <input type="text" id="registerUsername" placeholder="Benutzername" required>
             <input type="email" id="registerEmail" placeholder="E-Mail" required>
-            <input type="password" id="registerPassword" placeholder="Passwort" required>
+            <div>
+                <input type="password" id="registerPassword" placeholder="Passwort" required>
+                <label>
+                    <input type="checkbox" onclick="togglePasswordVisibility('registerPassword')"> Passwort anzeigen
+                </label>
+            </div>
             <button onclick="register()">Registrieren</button>
             <p>Bereits einen Account? <a href="#" onclick="toggleAuthMode()">Anmelden</a></p>
         </div>
@@ -127,22 +137,32 @@
 
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
-    authDomain: "stories-c4b2e.firebaseapp.com",
-    databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
-    projectId: "stories-c4b2e",
-    storageBucket: "stories-c4b2e.appspot.com",
-    messagingSenderId: "843705586806",
-    appId: "1:843705586806:web:7a287b6ef958aba73afb57",
-    measurementId: "G-TGV27NXDRD"
-};
+            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+            authDomain: "stories-c4b2e.firebaseapp.com",
+            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+            projectId: "stories-c4b2e",
+            storageBucket: "stories-c4b2e.appspot.com",
+            messagingSenderId: "843705586806",
+            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+            measurementId: "G-TGV27NXDRD"
+        };
 
         firebase.initializeApp(firebaseConfig);
 
+        function togglePasswordVisibility(inputId) {
+            const passwordField = document.getElementById(inputId);
+            passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+        }
+
         function login() {
-            const email = document.getElementById('authEmail').value;
+            const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
             const loginMessage = document.getElementById('loginMessage');
+
+            if (!validateEmail(email)) {
+                loginMessage.innerText = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+                return;
+            }
 
             loginMessage.innerText = "Anmeldung läuft...";
             firebase.auth().signInWithEmailAndPassword(email, password)
@@ -161,13 +181,12 @@
             const password = document.getElementById('registerPassword').value;
             const registerMessage = document.getElementById('registerMessage');
 
-            if (!username || !email || !password) {
-                registerMessage.innerText = "Bitte füllen Sie alle Felder aus.";
+            if (!username || !validateEmail(email) || !validatePassword(password)) {
+                registerMessage.innerText = "Bitte füllen Sie alle Felder korrekt aus.";
                 return;
             }
 
             registerMessage.innerText = "Registrierung läuft...";
-            
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
@@ -189,6 +208,15 @@
                 });
         }
 
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
         function toggleAuthMode() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
@@ -205,39 +233,34 @@
             registerForm.classList.toggle('hidden');
         }
 
-function getGroupIdFromURL() {
-    // Versucht zuerst, den groupId aus dem URL-Hash zu extrahieren
-    const hashParams = new URLSearchParams(window.location.hash.substr(1));
-    const groupIdFromHash = hashParams.get('groupId');
-    
-    if (groupIdFromHash) {
-        return groupIdFromHash;
-    }
+        document.addEventListener("DOMContentLoaded", function () {
+            const groupId = getGroupIdFromURL();
+            console.log(groupId);
 
-    // Falls nicht im Hash, dann aus den URL-Parametern extrahieren
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('groupId');
-}
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect');
 
-       document.addEventListener("DOMContentLoaded", function () {
-    // Extrahiert die `groupId` aus der URL
-    const groupId = getGroupIdFromURL();
-    console.log(groupId); // Zeigt die `groupId` aus der URL an
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    let redirectUrlWithGroupId = redirectUrl
+                        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
+                        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
+                    window.location.href = redirectUrlWithGroupId;
+                }
+            });
+        });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
+        function getGroupIdFromURL() {
+            const hashParams = new URLSearchParams(window.location.hash.substr(1));
+            const groupIdFromHash = hashParams.get('groupId');
 
-    // Überprüft den Authentifizierungsstatus des Benutzers
-    firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-            // Falls die `groupId` vorhanden ist, zur Zielseite mit groupId umleiten, andernfalls ohne groupId
-            let redirectUrlWithGroupId = redirectUrl 
-                ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
-                : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
-            window.location.href = redirectUrlWithGroupId;
+            if (groupIdFromHash) {
+                return groupIdFromHash;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('groupId');
         }
-    });
-});
     </script>
 </body>
 </html>
