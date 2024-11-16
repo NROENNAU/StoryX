@@ -219,7 +219,7 @@ function getGroupIdFromURL() {
     return urlParams.get('groupId');
 }
 
-        document.addEventListener("DOMContentLoaded", function () {
+       document.addEventListener("DOMContentLoaded", function () {
     // Extrahiert die `groupId` aus der URL
     const groupId = getGroupIdFromURL();
     console.log(groupId); // Zeigt die `groupId` aus der URL an
@@ -230,8 +230,10 @@ function getGroupIdFromURL() {
     // Überprüft den Authentifizierungsstatus des Benutzers
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            // Falls die `groupId` vorhanden ist, zur Zielseite mit groupId umleiten
-            let redirectUrlWithGroupId = redirectUrl ? `${redirectUrl}#groupId=${groupId}` : `index.html#groupId=${groupId}`;
+            // Falls die `groupId` vorhanden ist, zur Zielseite mit groupId umleiten, andernfalls ohne groupId
+            let redirectUrlWithGroupId = redirectUrl 
+                ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
+                : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
             window.location.href = redirectUrlWithGroupId;
         }
     });
