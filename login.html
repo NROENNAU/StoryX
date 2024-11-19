@@ -187,26 +187,33 @@
             }
 
             registerMessage.innerText = "Registrierung läuft...";
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return user.updateProfile({
-                        displayName: username
-                    }).then(() => {
-                        return firebase.database().ref(`users/${user.uid}`).set({
-                            username: username,
-                            email: email
-                        });
-                    });
-                })
-                .then(() => {
-                    registerMessage.innerText = "Registrierung erfolgreich!";
-                    window.location.href = "index.html";
-                })
-                .catch((error) => {
-                    registerMessage.innerText = `Fehler: ${error.message}`;
-                });
-        }
+firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("Benutzer erstellt:", user.uid);
+
+        // Benutzerprofil aktualisieren
+        return user.updateProfile({
+            displayName: username
+        }).then(() => {
+            console.log("Profil aktualisiert für:", user.displayName);
+
+            // Datenbankeintrag erstellen
+            return firebase.database().ref(`users/${user.uid}`).set({
+                username: username,
+                email: email
+            });
+        });
+    })
+    .then(() => {
+        console.log("Benutzerdaten erfolgreich gespeichert.");
+        registerMessage.innerText = "Registrierung erfolgreich!";
+        window.location.href = "index.html";
+    })
+    .catch((error) => {
+        console.error("Registrierungsfehler:", error);
+        registerMessage.innerText = `Fehler: ${error.message}`;
+    });
 
         function validateEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
