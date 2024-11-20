@@ -175,31 +175,29 @@
                 });
         }
 
-        function register() {
+function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const registerMessage = document.getElementById('registerMessage');
 
-    // Überprüfung der Eingaben
     if (!username || !validateEmail(email) || !validatePassword(password)) {
         registerMessage.innerText = "Bitte füllen Sie alle Felder korrekt aus.";
         return;
     }
 
-    // Statusnachricht anzeigen
     registerMessage.innerText = "Registrierung läuft...";
 
-    // Benutzer registrieren
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
 
-            // Profil mit Benutzername aktualisieren
-            return user.updateProfile({
-                displayName: username
-            }).then(() => {
-                // Benutzername und E-Mail in der Realtime Database speichern
+            if (!user || !user.uid) {
+                throw new Error("UID konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.");
+            }
+
+            // Benutzerprofil aktualisieren und Daten speichern
+            return user.updateProfile({ displayName: username }).then(() => {
                 return firebase.database().ref(`users/${user.uid}`).set({
                     username: username,
                     email: email
@@ -207,14 +205,12 @@
             });
         })
         .then(() => {
-            // Erfolgsmeldung anzeigen
             registerMessage.innerText = "Registrierung erfolgreich! Sie werden weitergeleitet...";
             setTimeout(() => {
                 window.location.href = "index.html";
             }, 2000);
         })
         .catch((error) => {
-            // Fehlermeldung anzeigen
             registerMessage.innerText = `Fehler: ${error.message}`;
         });
 }
