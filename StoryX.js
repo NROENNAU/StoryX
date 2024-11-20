@@ -343,6 +343,7 @@ function showAllStories() {
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
 }
+
 // Function to open the edit pop-up
 function openEditPopup(storyId, currentText) {
     const popupContainer = document.createElement('div');
