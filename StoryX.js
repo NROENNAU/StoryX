@@ -275,7 +275,6 @@ imageCollageContainer.classList.add('hidden'); // Verstecke den Collage-Containe
 
 }
 
-// Function to display all stories
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
@@ -300,50 +299,6 @@ function showAllStories() {
                     storyItem.classList.add('story-item');
 
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
-
-                    // Container for the buttons
-                    const buttonContainer = document.createElement('div');
-                    buttonContainer.classList.add('story-buttons');
-
-                    // Edit button, visible only if the user is the creator
-                    if (story.creatorId === userId) {
-                        const editButton = document.createElement('button');
-                        editButton.textContent = '✏️';
-                        editButton.classList.add('edit-button');
-                        editButton.addEventListener('click', () => {
-                            openEditPopup(childSnapshot.key, story.text);
-                        });
-                        buttonContainer.appendChild(editButton);
-                    }
-
-                    // "Details" button, always visible
-                    const detailsButton = document.createElement('button');
-                    detailsButton.textContent = 'Details';
-                    detailsButton.classList.add('details-button');
-                    detailsButton.addEventListener('click', () => {
-                        openDetailsPopup(childSnapshot.key); // Open details pop-up
-                    });
-                    buttonContainer.appendChild(detailsButton);
-
-                    storyItem.appendChild(buttonContainer);
-                    storyItem.dataset.storyId = childSnapshot.key; // Store story ID for search
-                    storiesArray.push(storyItem); // Add story element to array
-                });
-
-                // Add all story elements to the top of the container
-                storiesArray.reverse().forEach(item => {
-                    storyListContainer.appendChild(item);
-                });
-
-                // Add event listener for the search functionality
-                document.getElementById('searchInput').addEventListener('input', filterStories);
-            }).catch((error) => console.error("Fehler beim Abrufen der Stories: ", error));
-        } else {
-            storyListContainer.innerHTML = "Keine Gruppe zugeordnet.";
-        }
-    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
-
 // Function to open the edit pop-up
 function openEditPopup(storyId, currentText) {
     const popupContainer = document.createElement('div');
