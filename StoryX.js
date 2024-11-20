@@ -291,32 +291,39 @@ function showAllStories() {
     ]).then(([groupSnapshot, hiddenFlagSnapshot]) => {
         const groupId = groupSnapshot.val();
         const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default to false if no hiddenFlag is set
-        
-        if (groupId) {
-            const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
-            storiesRef.once('value').then((snapshot) => {
-                storyListContainer.innerHTML = ''; // Clear existing stories
 
-                snapshot.forEach((childSnapshot) => {
-                    const story = childSnapshot.val();
-                    const storyItem = document.createElement('div');
-                    storyItem.classList.add('story-item');
-
-                    // Determine if the story should be shown
-                    let showStory = true;
-                    if (!userHiddenFlag && story.hiddenFlag === true) {
-                        showStory = false; // Don't show the story if the user's hiddenFlag is false and the story's hiddenFlag is true
-                    }
-
-                    if (showStory) {
-                        storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
-                        storyListContainer.appendChild(storyItem);
-                    }
-                });
-            });
+        if (!groupId) {
+            console.error("Keine Gruppe für den Benutzer gefunden");
+            storyListContainer.innerHTML = "Keine Gruppe gefunden."; // Inform user if no group is available
+            return; // Stop further processing if no group is found
         }
+
+        const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
+        storiesRef.once('value').then((snapshot) => {
+            storyListContainer.innerHTML = ''; // Clear existing stories
+
+            snapshot.forEach((childSnapshot) => {
+                const story = childSnapshot.val();
+                const storyItem = document.createElement('div');
+                storyItem.classList.add('story-item');
+
+                // Determine if the story should be shown
+                let showStory = true;
+                if (!userHiddenFlag && story.hiddenFlag === true) {
+                    showStory = false; // Don't show the story if the user's hiddenFlag is false and the story's hiddenFlag is true
+                }
+
+                if (showStory) {
+                    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+                    storyListContainer.appendChild(storyItem);
+                }
+            });
+        }).catch((error) => {
+            console.error('Fehler beim Abrufen der Geschichten:', error);
+        });
     }).catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error('Fehler beim Abrufen der Benutzerdaten:', error);
+        storyListContainer.innerHTML = "Fehler beim Laden der Benutzerdaten."; // Inform user about the error
     });
 }
 
