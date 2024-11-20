@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Ich möchte, dass der username auf der datenbank gespeichert wird. du kannst ihn auch gern in den authentifizierungsdaten speichewrn, wenn es nicht anders geht. <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -171,11 +171,11 @@
                     window.location.href = "index.html";
                 })
                 .catch((error) => {
-                    loginMessage.innerText = Fehler: ${error.message};
+                    loginMessage.innerText = `Fehler: ${error.message}`;
                 });
         }
 
-function register() {
+        function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
@@ -187,31 +187,32 @@ function register() {
     }
 
     registerMessage.innerText = "Registrierung läuft...";
-
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
+            console.log("Benutzer erstellt:", user.uid);
 
-            if (!user || !user.uid) {
-                throw new Error("UID konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.");
-            }
+            // Benutzerprofil aktualisieren
+            return user.updateProfile({
+                displayName: username
+            }).then(() => {
+                console.log("Profil aktualisiert für:", user.displayName);
 
-            // Benutzerprofil aktualisieren und Daten speichern
-            return user.updateProfile({ displayName: username }).then(() => {
-                return firebase.database().ref(users/${user.uid}).set({
+                // Datenbankeintrag erstellen
+                return firebase.database().ref(`users/${user.uid}`).set({
                     username: username,
                     email: email
                 });
             });
         })
         .then(() => {
-            registerMessage.innerText = "Registrierung erfolgreich! Sie werden weitergeleitet...";
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 2000);
+            console.log("Benutzerdaten erfolgreich gespeichert.");
+            registerMessage.innerText = "Registrierung erfolgreich!";
+            window.location.href = "index.html";
         })
         .catch((error) => {
-            registerMessage.innerText = Fehler: ${error.message};
+            console.error("Registrierungsfehler:", error);
+            registerMessage.innerText = `Fehler: ${error.message}`;
         });
 }
 
@@ -250,8 +251,8 @@ function register() {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
                     let redirectUrlWithGroupId = redirectUrl
-                        ? (groupId ? ${redirectUrl}#groupId=${groupId} : redirectUrl)
-                        : (groupId ? index.html#groupId=${groupId} : index.html);
+                        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
+                        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
                     window.location.href = redirectUrlWithGroupId;
                 }
             });
