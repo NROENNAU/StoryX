@@ -300,6 +300,7 @@ function showAllStories() {
                     storyItem.classList.add('story-item');
 
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+
                     // Container for the buttons
                     const buttonContainer = document.createElement('div');
                     buttonContainer.classList.add('story-buttons');
@@ -341,7 +342,6 @@ function showAllStories() {
             storyListContainer.innerHTML = "Keine Gruppe zugeordnet.";
         }
     }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
 }
 // Function to open the edit pop-up
 function openEditPopup(storyId, currentText) {
