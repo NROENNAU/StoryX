@@ -248,15 +248,37 @@ function register() {
             const redirectUrl = urlParams.get('redirect');
 
             firebase.auth().onAuthStateChanged(function (user) {
-                if (user) {
-                    let redirectUrlWithGroupId = redirectUrl
-                        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
-                        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
-                    window.location.href = redirectUrlWithGroupId;
-                }
-            });
+    if (user) {
+        // Check, ob Benutzer bereits in der Realtime Database ist
+        const userRef = firebase.database().ref(`users/${user.uid}`);
+        userRef.once('value', (snapshot) => {
+            if (snapshot.exists()) {
+                // Benutzer bereits gespeichert - Weiterleitung mit Group-ID
+                redirectWithGroupId();
+            } else {
+                // Warte auf Speicherung, falls nötig
+                userRef.on('value', (newSnapshot) => {
+                    if (newSnapshot.exists()) {
+                        redirectWithGroupId();
+                        userRef.off(); // Event-Listener entfernen
+                    }
+                });
+            }
         });
+    }
+});
 
+function redirectWithGroupId() {
+    const groupId = getGroupIdFromURL();
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    let redirectUrlWithGroupId = redirectUrl
+        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
+        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
+
+    window.location.href = redirectUrlWithGroupId;
+}
         function getGroupIdFromURL() {
             const hashParams = new URLSearchParams(window.location.hash.substr(1));
             const groupIdFromHash = hashParams.get('groupId');
