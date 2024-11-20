@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Kann es sein, dass das speichern des usersnamens durch die function mit der groupid kaputt gegangen ist? <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -171,7 +171,7 @@
                     window.location.href = "index.html";
                 })
                 .catch((error) => {
-                    loginMessage.innerText = `Fehler: ${error.message}`;
+                    loginMessage.innerText = Fehler: ${error.message};
                 });
         }
 
@@ -198,7 +198,7 @@ function register() {
 
             // Benutzerprofil aktualisieren und Daten speichern
             return user.updateProfile({ displayName: username }).then(() => {
-                return firebase.database().ref(`users/${user.uid}`).set({
+                return firebase.database().ref(users/${user.uid}).set({
                     username: username,
                     email: email
                 });
@@ -211,7 +211,7 @@ function register() {
             }, 2000);
         })
         .catch((error) => {
-            registerMessage.innerText = `Fehler: ${error.message}`;
+            registerMessage.innerText = Fehler: ${error.message};
         });
 }
 
@@ -248,37 +248,15 @@ function register() {
             const redirectUrl = urlParams.get('redirect');
 
             firebase.auth().onAuthStateChanged(function (user) {
-    if (user) {
-        // Check, ob Benutzer bereits in der Realtime Database ist
-        const userRef = firebase.database().ref(`users/${user.uid}`);
-        userRef.once('value', (snapshot) => {
-            if (snapshot.exists()) {
-                // Benutzer bereits gespeichert - Weiterleitung mit Group-ID
-                redirectWithGroupId();
-            } else {
-                // Warte auf Speicherung, falls nötig
-                userRef.on('value', (newSnapshot) => {
-                    if (newSnapshot.exists()) {
-                        redirectWithGroupId();
-                        userRef.off(); // Event-Listener entfernen
-                    }
-                });
-            }
+                if (user) {
+                    let redirectUrlWithGroupId = redirectUrl
+                        ? (groupId ? ${redirectUrl}#groupId=${groupId} : redirectUrl)
+                        : (groupId ? index.html#groupId=${groupId} : index.html);
+                    window.location.href = redirectUrlWithGroupId;
+                }
+            });
         });
-    }
-});
 
-function redirectWithGroupId() {
-    const groupId = getGroupIdFromURL();
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
-
-    let redirectUrlWithGroupId = redirectUrl
-        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
-        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
-
-    window.location.href = redirectUrlWithGroupId;
-}
         function getGroupIdFromURL() {
             const hashParams = new URLSearchParams(window.location.hash.substr(1));
             const groupIdFromHash = hashParams.get('groupId');
