@@ -275,16 +275,21 @@ imageCollageContainer.classList.add('hidden'); // Verstecke den Collage-Containe
 
 }
 
+// Function to display all stories
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
     document.getElementById('searchContainer').classList.remove('hidden'); // Show search functionality
 
     const userId = firebase.auth().currentUser.uid;
+    console.log('User ID:', userId); // Debug: Log user ID
+
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
 
     userGroupRef.once('value').then((snapshot) => {
         const groupId = snapshot.val();
+        console.log('Group ID:', groupId); // Debug: Log group ID
+
         if (groupId) {
             const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
             storiesRef.once('value').then((snapshot) => {
@@ -299,79 +304,52 @@ function showAllStories() {
                     storyItem.classList.add('story-item');
 
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
-// Function to open the edit pop-up
-function openEditPopup(storyId, currentText) {
-    const popupContainer = document.createElement('div');
-    popupContainer.classList.add('popup-container');
+                    // Container for the buttons
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.classList.add('story-buttons');
 
-    const popupContent = document.createElement('div');
-    popupContent.classList.add('popup-content');
+                    // Edit button, visible only if the user is the creator
+                    if (story.creatorId === userId) {
+                        const editButton = document.createElement('button');
+                        editButton.textContent = '✏️';
+                        editButton.classList.add('edit-button');
+                        editButton.addEventListener('click', () => {
+                            openEditPopup(childSnapshot.key, story.text);
+                        });
+                        buttonContainer.appendChild(editButton);
+                    }
 
-    const title = document.createElement('h2');
-    title.innerText = "Story bearbeiten";
-    popupContent.appendChild(title);
+                    // "Details" button, always visible
+                    const detailsButton = document.createElement('button');
+                    detailsButton.textContent = 'Details';
+                    detailsButton.classList.add('details-button');
+                    detailsButton.addEventListener('click', () => {
+                        openDetailsPopup(childSnapshot.key); // Open details pop-up
+                    });
+                    buttonContainer.appendChild(detailsButton);
 
-    const storyInput = document.createElement('textarea');
-    storyInput.value = currentText; // Pre-fill with current text
-    popupContent.appendChild(storyInput);
+                    storyItem.appendChild(buttonContainer);
+                    storyItem.dataset.storyId = childSnapshot.key; // Store story ID for search
+                    storiesArray.push(storyItem); // Add story element to array
+                });
 
-    const saveButton = document.createElement('button');
-    saveButton.innerText = "Speichern";
-    saveButton.onclick = () => {
-        const newText = storyInput.value.trim();
-        if (newText.length === 0) {
-            alert("Die Story darf nicht leer sein.");
-            return;
-        } else if (newText.length > 50) {
-            alert("Die Story darf maximal 50 Zeichen lang sein.");
-            return;
+                // Add all story elements to the top of the container
+                storiesArray.reverse().forEach(item => {
+                    storyListContainer.appendChild(item);
+                });
+
+                // Add event listener for the search functionality
+                document.getElementById('searchInput').addEventListener('input', filterStories);
+            }).catch((error) => {
+                console.error("Fehler beim Abrufen der Stories: ", error);
+            });
+        } else {
+            storyListContainer.innerHTML = "Keine Gruppe zugeordnet.";
         }
-        updateStory(storyId, newText);
-        document.body.removeChild(popupContainer); // Close pop-up
-    };
-    popupContent.appendChild(saveButton);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.innerText = "Löschen";
-    deleteButton.onclick = () => {
-        const confirmation = confirm('Möchten Sie diese Story wirklich löschen?');
-        if (confirmation) {
-            deleteStory(storyId);
-        }
-        document.body.removeChild(popupContainer); // Close pop-up
-    };
-    popupContent.appendChild(deleteButton);
-
-    const cancelButton = document.createElement('button');
-    cancelButton.innerText = "Abbrechen";
-    cancelButton.onclick = () => {
-        document.body.removeChild(popupContainer); // Close pop-up
-    };
-    popupContent.appendChild(cancelButton);
-
-    popupContainer.appendChild(popupContent);
-    document.body.appendChild(popupContainer);
+    }).catch((error) => {
+        console.error("Fehler beim Abrufen der Gruppeninformationen: ", error);
+    });
 }
-
-// Function to update a story
-function updateStory(storyId, newText) {
-    const userId = firebase.auth().currentUser.uid;
-    const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
-
-    userGroupRef.once('value').then((snapshot) => {
-        const groupId = snapshot.val();
-        if (groupId) {
-            const storyRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}`);
-            storyRef.update({ text: newText })
-                .then(() => {
-                    console.log("Story erfolgreich aktualisiert");
-                    showAllStories(); // Refresh the list
-                })
-                .catch((error) => console.error("Fehler beim Aktualisieren der Story: ", error));
-        }
-    }).catch((error) => console.error("Fehler beim Abrufen der Gruppeninformationen: ", error));
-}
-
 // Function to open the details pop-up
 function openDetailsPopup(storyId) {
     const popup = document.createElement('div');
