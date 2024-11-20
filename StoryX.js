@@ -284,38 +284,39 @@ function showAllStories() {
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
     const userHiddenFlagRef = firebase.database().ref(`users/${userId}/hiddenFlag`);
 
-    // Get the user's group and hidden flag
+    // Hole die Benutzergruppe und das HiddenFlag gleichzeitig mit Promise.all
     Promise.all([
         userGroupRef.once('value'),
         userHiddenFlagRef.once('value')
     ]).then(([groupSnapshot, hiddenFlagSnapshot]) => {
         const groupId = groupSnapshot.val();
-        const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default to false if no hiddenFlag is set
+        const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default auf false setzen, falls nichts gefunden wird
 
         if (!groupId) {
             console.error("Keine Gruppe für den Benutzer gefunden");
-            storyListContainer.innerHTML = "Keine Gruppe gefunden."; // Inform user if no group is available
-            return; // Stop further processing if no group is found
+            storyListContainer.innerHTML = "Keine Gruppe gefunden."; // Informiere den Benutzer, wenn keine Gruppe vorhanden ist
+            return; // Beende das Laden der Stories, wenn keine Gruppe vorhanden ist
         }
 
+        // Erstelle die Referenz zu den Geschichten der Gruppe
         const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
         storiesRef.once('value').then((snapshot) => {
-            storyListContainer.innerHTML = ''; // Clear existing stories
+            storyListContainer.innerHTML = ''; // Lösche vorherige Stories
 
             snapshot.forEach((childSnapshot) => {
                 const story = childSnapshot.val();
                 const storyItem = document.createElement('div');
                 storyItem.classList.add('story-item');
 
-                // Determine if the story should be shown
+                // Bestimme, ob die Story angezeigt werden soll
                 let showStory = true;
 
-                // If the user's hiddenFlag is false, only show stories where the story's hiddenFlag is false
+                // Wenn der Benutzer's hiddenFlag false ist, filtere Geschichten mit hiddenFlag true
                 if (!userHiddenFlag && story.hiddenFlag === true) {
-                    showStory = false; // Don't show the story if the user's hiddenFlag is false and the story's hiddenFlag is true
+                    showStory = false; // Story wird nicht angezeigt, wenn das HiddenFlag des Benutzers false ist und die Story ein HiddenFlag true hat
                 }
 
-                // If the story should be shown, append it to the list
+                // Wenn die Story angezeigt werden soll, dann füge sie zur Liste hinzu
                 if (showStory) {
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
                     storyListContainer.appendChild(storyItem);
@@ -323,10 +324,11 @@ function showAllStories() {
             });
         }).catch((error) => {
             console.error('Fehler beim Abrufen der Geschichten:', error);
+            storyListContainer.innerHTML = "Fehler beim Laden der Geschichten."; // Benutzer informieren
         });
     }).catch((error) => {
         console.error('Fehler beim Abrufen der Benutzerdaten:', error);
-        storyListContainer.innerHTML = "Fehler beim Laden der Benutzerdaten."; // Inform user about the error
+        storyListContainer.innerHTML = "Fehler beim Laden der Benutzerdaten."; // Benutzer informieren
     });
 }
 
