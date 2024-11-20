@@ -809,6 +809,37 @@ window.onload = function() {
     updateVersionsButton();
 };
 
+// Funktion zum Abrufen der Bild-URLs direkt aus der Firebase Realtime Database
+async function fetchImageUrlsFromDatabase(groupId, storyId, versionIds) {
+    const imageUrls = [];
+
+    // Iteriere über alle Versionen und hole die Bild-URLs
+    for (const versionId of versionIds) {
+        const versionRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions/${versionId}/images`);
+        
+        try {
+            const imageSnapshot = await versionRef.once('value');
+            const images = imageSnapshot.val();
+            
+            // Debugging-Ausgabe
+            console.log(`Bilder für Version ${versionId}:`, images); 
+
+            if (images) {
+                Object.values(images).forEach(imageUrl => {
+                    imageUrls.push(imageUrl); // Alle Bild-URLs zur Liste hinzufügen
+                });
+            } else {
+                console.log(`Keine Bilder für Version ${versionId} gefunden.`); // Debugging-Ausgabe
+            }
+        } catch (error) {
+            console.error(`Fehler beim Abrufen der Bilder für Version ${versionId}:`, error);
+        }
+    }
+
+    console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
+    return imageUrls;
+}
+
 // Funktion zum Abrufen der Versionen-IDs aus der Firebase Realtime Database
 async function fetchVersionIds(groupId, storyId) {
     const versionIds = [];
@@ -828,60 +859,19 @@ async function fetchVersionIds(groupId, storyId) {
     return versionIds;
 }
 
-// Funktion zum Abrufen des Textes aus einer Version
-async function fetchTextFromVersion(groupId, storyId, versionId) {
-    const versionRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions/${versionId}/text`);
-    const textSnapshot = await versionRef.once('value');
-    return textSnapshot.val(); // Rückgabe des Textes der Version
+// Funktion zum Anzeigen des Collage-Containers
+function showCollageContainer() {
+    imageCollageContainer.classList.remove('hidden'); // Collage-Container anzeigen
 }
 
-// Funktion zum Abrufen der Bild-URLs und Texte aus der Firebase Realtime Database
-async function fetchImageUrlsAndTextFromDatabase(groupId, storyId, versionIds) {
-    const imageUrls = [];
-    const textDetails = {};
-
-    // Iteriere über alle Versionen und hole die Bild-URLs sowie den Text
-    for (const versionId of versionIds) {
-        const versionRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions/${versionId}/images`);
-        
-        try {
-            const imageSnapshot = await versionRef.once('value');
-            const images = imageSnapshot.val();
-            
-            if (images) {
-                Object.values(images).forEach(imageUrl => {
-                    imageUrls.push(imageUrl); // Alle Bild-URLs zur Liste hinzufügen
-                });
-            } else {
-                console.log(`Keine Bilder für Version ${versionId} gefunden.`); 
-            }
-
-            // Prüfe, ob Text in der Version vorhanden ist
-            const text = await fetchTextFromVersion(groupId, storyId, versionId);
-            if (text) {
-                textDetails[versionId] = text; // Text der Version speichern
-            }
-
-        } catch (error) {
-            console.error(`Fehler beim Abrufen der Bilder oder Texte für Version ${versionId}:`, error);
-        }
-    }
-
-    console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
-    return { imageUrls, textDetails }; // Rückgabe der URLs und Texte
-}
-
-// Funktion zum Laden der Collage mit Text-Kacheln
 function loadCollageForStory(storyId) {
     showCollageContainer(); // Collage-Container anzeigen
 
     const collageContainer = document.getElementById('imageCollageContainer'); // Container für die Collage
     collageContainer.innerHTML = ''; // Vorherige Collage entfernen
 
-    const userId = firebase.auth().currentUser.uid; // Benutzer-ID
-    const groupId = getUserGroup(userId); // Gruppen-ID des Benutzers
-
-    getImagesForStory(storyId, groupId).then(({ imageUrls, textDetails }) => {
+    // Lade die Bild-URLs von der Funktion
+    getImagesForStory(storyId).then(imageUrls => {
         if (imageUrls.length > 0) {
             // Das erste Bild als Hintergrund im storyBoxContainer setzen
             const firstImageUrl = imageUrls[0];
@@ -899,6 +889,7 @@ function loadCollageForStory(storyId) {
                 img.src = url; // URL als Quelle
                 img.alt = 'Bild der Story'; // Alternativtext für das Bild
 
+                // Event Listener hinzufügen, damit das Bild in der StoryBox angezeigt wird
                 img.addEventListener('click', () => {
                     if (storyBoxContainer) {
                         storyBoxContainer.style.backgroundImage = `url(${url})`;
@@ -909,28 +900,9 @@ function loadCollageForStory(storyId) {
 
                 collageContainer.appendChild(img); // Bild in den Container einfügen
             });
-
-            // Füge weiße Kacheln hinzu, wenn Text vorhanden ist
-            for (const [versionId, text] of Object.entries(textDetails)) {
-                const textTile = document.createElement('div');
-                textTile.classList.add('text-tile');
-                textTile.style.backgroundColor = 'white';
-                textTile.style.width = '100px'; // Die Größe der Kachel anpassen
-                textTile.style.height = '100px'; // Die Größe der Kachel anpassen
-                textTile.innerText = `usernames Details`;
-
-                // Klick-Event für die Text-Kachel
-                textTile.addEventListener('click', () => {
-                    const storyBoxContainer = document.getElementById('storyBoxContainer');
-                    if (storyBoxContainer) {
-                        storyBoxContainer.innerHTML = `<p>${text}</p>`; // Text im Container anzeigen
-                    }
-                });
-
-                collageContainer.appendChild(textTile); // Kachel zur Collage hinzufügen
-            }
         } else {
             console.log('Keine Bilder für diese Story gefunden.');
+            // Wenn keine Bilder gefunden werden, setze das Standardbild als Hintergrund
             const storyBoxContainer = document.getElementById('storyBoxContainer');
             if (storyBoxContainer) {
                 storyBoxContainer.style.backgroundImage = `url('Hintergrund_StoryX.jpg')`;
@@ -939,7 +911,8 @@ function loadCollageForStory(storyId) {
             }
         }
     }).catch(error => {
-        console.error("Fehler beim Laden der Bilder und Texte:", error);
+        console.error("Fehler beim Laden der Bilder:", error);
+        // Im Fehlerfall auch das Standardbild setzen
         const storyBoxContainer = document.getElementById('storyBoxContainer');
         if (storyBoxContainer) {
             storyBoxContainer.style.backgroundImage = `url('Hintergrund_StoryX.jpg')`;
@@ -949,16 +922,52 @@ function loadCollageForStory(storyId) {
     });
 }
 
-async function getImagesForStory(storyId, groupId) {
+async function getImagesForStory(storyId) {
+    const userId = firebase.auth().currentUser.uid; // Benutzer-ID für die Firebase-Datenbank
+    const groupId = await getUserGroup(userId); // Holen der Gruppen-ID für den Benutzer
+
+    // Holen der Versionen und Bilder für eine Story aus der Firebase-Datenbank
     const versionIds = await fetchVersionIds(groupId, storyId);
-    const { imageUrls, textDetails } = await fetchImageUrlsAndTextFromDatabase(groupId, storyId, versionIds);
-    return { imageUrls, textDetails }; // Rückgabe der Bild-URLs und Texte
+    const imageUrls = await fetchImageUrlsFromDatabase(groupId, storyId, versionIds);
+
+    console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
+    return imageUrls; // Rückgabe der URLs
 }
 
 async function getUserGroup(userId) {
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
     const snapshot = await userGroupRef.once('value');
     return snapshot.val(); // Rückgabe der Gruppen-ID
+}
+
+async function fetchImageUrlsFromDatabase(groupId, storyId, versionIds) {
+    const imageUrls = [];
+
+    // Iteriere über alle Versionen und hole die Bild-URLs
+    for (const versionId of versionIds) {
+        const versionRef = firebase.database().ref(`groups/${groupId}/stories/${storyId}/versions/${versionId}/images`);
+        
+        try {
+            const imageSnapshot = await versionRef.once('value');
+            const images = imageSnapshot.val();
+            
+            // Debugging-Ausgabe
+            console.log(`Bilder für Version ${versionId}:`, images); 
+
+            if (images) {
+                Object.values(images).forEach(imageUrl => {
+                    imageUrls.push(imageUrl); // Alle Bild-URLs zur Liste hinzufügen
+                });
+            } else {
+                console.log(`Keine Bilder für Version ${versionId} gefunden.`); // Debugging-Ausgabe
+            }
+        } catch (error) {
+            console.error(`Fehler beim Abrufen der Bilder für Version ${versionId}:`, error);
+        }
+    }
+
+    console.log("Gefundene Bild-URLs:", imageUrls); // Debugging-Ausgabe
+    return imageUrls;
 }
 
 function initializeStoryBox() {
