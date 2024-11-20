@@ -135,140 +135,142 @@
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
-            authDomain: "stories-c4b2e.firebaseapp.com",
-            databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
-            projectId: "stories-c4b2e",
-            storageBucket: "stories-c4b2e.appspot.com",
-            messagingSenderId: "843705586806",
-            appId: "1:843705586806:web:7a287b6ef958aba73afb57",
-            measurementId: "G-TGV27NXDRD"
-        };
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAXFprdg5CbyxCSi7qXmy4BoAdwDdxmHZw",
+        authDomain: "stories-c4b2e.firebaseapp.com",
+        databaseURL: "https://stories-c4b2e-default-rtdb.firebaseio.com",
+        projectId: "stories-c4b2e",
+        storageBucket: "stories-c4b2e.appspot.com",
+        messagingSenderId: "843705586806",
+        appId: "1:843705586806:web:7a287b6ef958aba73afb57",
+        measurementId: "G-TGV27NXDRD"
+    };
 
-        firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-        function togglePasswordVisibility(inputId) {
-            const passwordField = document.getElementById(inputId);
-            passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
-        }
-
-        function login() {
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const loginMessage = document.getElementById('loginMessage');
-
-            if (!validateEmail(email)) {
-                loginMessage.innerText = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
-                return;
-            }
-
-            loginMessage.innerText = "Anmeldung läuft...";
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    loginMessage.innerText = "Anmeldung erfolgreich!";
-                    window.location.href = "index.html";
-                })
-                .catch((error) => {
-                    loginMessage.innerText = `Fehler: ${error.message}`;
-                });
-        }
-
-        function register() {
-    const username = document.getElementById('registerUsername').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const registerMessage = document.getElementById('registerMessage');
-
-    if (!username || !validateEmail(email) || !validatePassword(password)) {
-        registerMessage.innerText = "Bitte füllen Sie alle Felder korrekt aus.";
-        return;
+    function togglePasswordVisibility(inputId) {
+        const passwordField = document.getElementById(inputId);
+        passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
     }
 
-    registerMessage.innerText = "Registrierung läuft...";
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Benutzer erstellt:", user.uid);
+    function login() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const loginMessage = document.getElementById('loginMessage');
 
-            // Benutzerprofil aktualisieren
-            return user.updateProfile({
-                displayName: username
-            }).then(() => {
-                console.log("Profil aktualisiert für:", user.displayName);
+        if (!validateEmail(email)) {
+            loginMessage.innerText = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+            return;
+        }
 
-                // Datenbankeintrag erstellen
-                return firebase.database().ref(`users/${user.uid}`).set({
-                    username: username,
-                    email: email
+        loginMessage.innerText = "Anmeldung läuft...";
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(() => {
+                loginMessage.innerText = "Anmeldung erfolgreich!";
+                window.location.href = "index.html";
+            })
+            .catch((error) => {
+                loginMessage.innerText = `Fehler: ${error.message}`;
+            });
+    }
+
+    function register() {
+        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const registerMessage = document.getElementById('registerMessage');
+
+        if (!username || !validateEmail(email) || !validatePassword(password)) {
+            registerMessage.innerText = "Bitte füllen Sie alle Felder korrekt aus.";
+            return;
+        }
+
+        registerMessage.innerText = "Registrierung läuft...";
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                console.log("Benutzer erstellt:", user.uid);
+
+                // Benutzerprofil aktualisieren
+                return user.updateProfile({
+                    displayName: username
+                }).then(() => {
+                    console.log("Profil aktualisiert für:", user.displayName);
+
+                    // Datenbankeintrag erstellen
+                    return firebase.database().ref(`users/${user.uid}`).set({
+                        username: username,
+                        email: email
+                    });
                 });
+            })
+            .then(() => {
+                console.log("Benutzerdaten erfolgreich gespeichert.");
+                registerMessage.innerText = "Registrierung erfolgreich!";
+                
+                // Nach der erfolgreichen Registrierung und Datenbankaktualisierung, AuthState-Überprüfung durchführen
+                firebase.auth().onAuthStateChanged(function(user) {
+                    if (user) {
+                        // Wenn ein Benutzer authentifiziert ist, URL-Parameter auslesen
+                        const groupId = getGroupIdFromURL();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect');
+                        
+                        // Gruppen-ID in die URL einfügen, wenn vorhanden
+                        let redirectUrlWithGroupId = redirectUrl
+                            ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
+                            : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
+
+                        // Weiterleitung nach der erfolgreichen Registrierung
+                        setTimeout(() => {
+                            window.location.href = redirectUrlWithGroupId;
+                        }, 1000); // 1 Sekunde Verzögerung
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error("Registrierungsfehler:", error);
+                registerMessage.innerText = `Fehler: ${error.message}`;
             });
-        })
-        .then(() => {
-            console.log("Benutzerdaten erfolgreich gespeichert.");
-            registerMessage.innerText = "Registrierung erfolgreich!";
-            window.location.href = "index.html";
-        })
-        .catch((error) => {
-            console.error("Registrierungsfehler:", error);
-            registerMessage.innerText = `Fehler: ${error.message}`;
-        });
-}
+    }
 
-        function validateEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    function validatePassword(password) {
+        return password.length >= 6;
+    }
+
+    function toggleAuthMode() {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        if (loginForm.classList.contains('hidden')) {
+            document.getElementById('authEmail').value = document.getElementById('registerEmail').value;
+            document.getElementById('authPassword').value = document.getElementById('registerPassword').value;
+        } else {
+            document.getElementById('registerEmail').value = document.getElementById('authEmail').value;
+            document.getElementById('registerPassword').value = document.getElementById('authPassword').value;
         }
 
-        function validatePassword(password) {
-            return password.length >= 6;
+        loginForm.classList.toggle('hidden');
+        registerForm.classList.toggle('hidden');
+    }
+
+    function getGroupIdFromURL() {
+        const hashParams = new URLSearchParams(window.location.hash.substr(1));
+        const groupIdFromHash = hashParams.get('groupId');
+
+        if (groupIdFromHash) {
+            return groupIdFromHash;
         }
 
-        function toggleAuthMode() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-
-            if (loginForm.classList.contains('hidden')) {
-                document.getElementById('authEmail').value = document.getElementById('registerEmail').value;
-                document.getElementById('authPassword').value = document.getElementById('registerPassword').value;
-            } else {
-                document.getElementById('registerEmail').value = document.getElementById('authEmail').value;
-                document.getElementById('registerPassword').value = document.getElementById('authPassword').value;
-            }
-
-            loginForm.classList.toggle('hidden');
-            registerForm.classList.toggle('hidden');
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const groupId = getGroupIdFromURL();
-            console.log(groupId);
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectUrl = urlParams.get('redirect');
-
-            firebase.auth().onAuthStateChanged(function (user) {
-                if (user) {
-                    let redirectUrlWithGroupId = redirectUrl
-                        ? (groupId ? `${redirectUrl}#groupId=${groupId}` : redirectUrl)
-                        : (groupId ? `index.html#groupId=${groupId}` : `index.html`);
-                    window.location.href = redirectUrlWithGroupId;
-                }
-            });
-        });
-
-        function getGroupIdFromURL() {
-            const hashParams = new URLSearchParams(window.location.hash.substr(1));
-            const groupIdFromHash = hashParams.get('groupId');
-
-            if (groupIdFromHash) {
-                return groupIdFromHash;
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('groupId');
-        }
-    </script>
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('groupId');
+    }
+</script>
 </body>
 </html>
