@@ -181,24 +181,25 @@
     const password = document.getElementById('registerPassword').value;
     const registerMessage = document.getElementById('registerMessage');
 
+    // Überprüfung der Eingaben
     if (!username || !validateEmail(email) || !validatePassword(password)) {
         registerMessage.innerText = "Bitte füllen Sie alle Felder korrekt aus.";
         return;
     }
 
+    // Statusnachricht anzeigen
     registerMessage.innerText = "Registrierung läuft...";
+
+    // Benutzer registrieren
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            console.log("Benutzer erstellt:", user.uid);
 
-            // Benutzerprofil aktualisieren
+            // Profil mit Benutzername aktualisieren
             return user.updateProfile({
                 displayName: username
             }).then(() => {
-                console.log("Profil aktualisiert für:", user.displayName);
-
-                // Datenbankeintrag erstellen
+                // Benutzername und E-Mail in der Realtime Database speichern
                 return firebase.database().ref(`users/${user.uid}`).set({
                     username: username,
                     email: email
@@ -206,12 +207,14 @@
             });
         })
         .then(() => {
-            console.log("Benutzerdaten erfolgreich gespeichert.");
-            registerMessage.innerText = "Registrierung erfolgreich!";
-            window.location.href = "index.html";
+            // Erfolgsmeldung anzeigen
+            registerMessage.innerText = "Registrierung erfolgreich! Sie werden weitergeleitet...";
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 2000);
         })
         .catch((error) => {
-            console.error("Registrierungsfehler:", error);
+            // Fehlermeldung anzeigen
             registerMessage.innerText = `Fehler: ${error.message}`;
         });
 }
