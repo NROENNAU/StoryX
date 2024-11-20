@@ -278,7 +278,7 @@ imageCollageContainer.classList.add('hidden'); // Verstecke den Collage-Containe
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
-    document.getElementById('searchContainer').classList.remove('hidden'); // Show search functionality
+    document.getElementById('searchContainer').classList.remove('hidden'); // Zeige die Suchfunktion an
 
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
@@ -290,7 +290,7 @@ function showAllStories() {
         userHiddenFlagRef.once('value')
     ]).then(([groupSnapshot, hiddenFlagSnapshot]) => {
         const groupId = groupSnapshot.val();
-        const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default auf false setzen, falls nichts gefunden wird
+        const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default auf false, falls nichts gefunden wird
 
         if (!groupId) {
             console.error("Keine Gruppe für den Benutzer gefunden");
