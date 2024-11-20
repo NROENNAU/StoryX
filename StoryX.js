@@ -309,10 +309,13 @@ function showAllStories() {
 
                 // Determine if the story should be shown
                 let showStory = true;
+
+                // If the user's hiddenFlag is false, only show stories where the story's hiddenFlag is false
                 if (!userHiddenFlag && story.hiddenFlag === true) {
                     showStory = false; // Don't show the story if the user's hiddenFlag is false and the story's hiddenFlag is true
                 }
 
+                // If the story should be shown, append it to the list
                 if (showStory) {
                     storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
                     storyListContainer.appendChild(storyItem);
