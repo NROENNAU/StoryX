@@ -275,7 +275,6 @@ imageCollageContainer.classList.add('hidden'); // Verstecke den Collage-Containe
 
 }
 
-// Function to display all stories
 function showAllStories() {
     hideAllContainers();
     storyListContainer.classList.remove('hidden');
@@ -283,23 +282,43 @@ function showAllStories() {
 
     const userId = firebase.auth().currentUser.uid;
     const userGroupRef = firebase.database().ref(`users/${userId}/currentGroup`);
+    const userHiddenFlagRef = firebase.database().ref(`users/${userId}/hiddenFlag`);
 
-    userGroupRef.once('value').then((snapshot) => {
-        const groupId = snapshot.val();
+    // Get the user's group and hidden flag
+    Promise.all([
+        userGroupRef.once('value'),
+        userHiddenFlagRef.once('value')
+    ]).then(([groupSnapshot, hiddenFlagSnapshot]) => {
+        const groupId = groupSnapshot.val();
+        const userHiddenFlag = hiddenFlagSnapshot.val() || false; // Default to false if no hiddenFlag is set
+        
         if (groupId) {
             const storiesRef = firebase.database().ref(`groups/${groupId}/stories`);
             storiesRef.once('value').then((snapshot) => {
                 storyListContainer.innerHTML = ''; // Clear existing stories
-
-                // Array to store story elements
-                const storiesArray = [];
 
                 snapshot.forEach((childSnapshot) => {
                     const story = childSnapshot.val();
                     const storyItem = document.createElement('div');
                     storyItem.classList.add('story-item');
 
-                    storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+                    // Determine if the story should be shown
+                    let showStory = true;
+                    if (!userHiddenFlag && story.hiddenFlag === true) {
+                        showStory = false; // Don't show the story if the user's hiddenFlag is false and the story's hiddenFlag is true
+                    }
+
+                    if (showStory) {
+                        storyItem.innerHTML = `<div class="story-content">${story.text || "Inhalt nicht verfügbar"}</div>`;
+                        storyListContainer.appendChild(storyItem);
+                    }
+                });
+            });
+        }
+    }).catch((error) => {
+        console.error('Error fetching data:', error);
+    });
+}
 
                     // Container for the buttons
                     const buttonContainer = document.createElement('div');
